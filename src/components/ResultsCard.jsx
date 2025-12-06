@@ -187,10 +187,32 @@ export function ResultsCard({ results, onClose }) {
                                     borderTop: '1px solid rgba(255,255,255,0.1)',
                                     marginTop: '5px'
                                 }}>
+                                    {source.location && (
+                                        <p style={{ fontSize: '0.75rem', opacity: 0.5, marginBottom: '5px', fontStyle: 'italic' }}>
+                                            📍 Found in: {source.location}
+                                        </p>
+                                    )}
                                     <p style={{ margin: '8px 0', fontSize: '0.75rem', opacity: 0.5 }}>Listed Ingredients:</p>
-                                    <div style={{ lineHeight: '1.6' }}>
+                                    <div style={{ lineHeight: '1.6', marginBottom: '10px' }}>
                                         {source.ingredients && source.ingredients.join(', ')}
                                     </div>
+                                    <a
+                                        href={source.url || `https://www.google.com/search?q=${encodeURIComponent('site:' + source.name + ' ' + results.productName)}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{
+                                            display: 'inline-block',
+                                            fontSize: '0.8rem',
+                                            color: 'var(--primary-accent)',
+                                            textDecoration: 'none',
+                                            border: '1px solid var(--primary-accent)',
+                                            padding: '6px 12px',
+                                            borderRadius: '6px',
+                                            marginTop: '5px'
+                                        }}
+                                    >
+                                        🔗 Visit {source.name}
+                                    </a>
                                 </div>
                             </details>
                         </li>

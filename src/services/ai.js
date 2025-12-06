@@ -14,10 +14,12 @@ Format your response as a JSON object:
   "category": "Food" or "Cosmetic",
   "analysisMethod": "MultiSource",
   "sources": [
+  "sources": [
     {
-      "name": "Source Name" (e.g. "Sephora", "EWG", "Official Site"),
-      "url": "Likely URL if known" (optional),
-      "ingredients": ["Water", "Glycerin", "Fragrance"] (List of strings)
+      "name": "Source Name" (e.g. "Sephora", "EWG"),
+      "url": "Exact Product Page URL" (or generic search URL if unknown),
+      "location": "Context" (e.g. "Ingredients Tab", "Back of Bottle", "Description"),
+      "ingredients": ["Water", "Glycerin", "Fragrance"]
     }
   ],
   "isVegan": Boolean
