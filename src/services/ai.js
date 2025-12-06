@@ -3,22 +3,24 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const PROMPT = `
 Analyze the image to identify the product.
 
-**STRICT SOURCING PROTOCOL**:
+**STRICT DOMAIN WHITELIST ONLY**:
+You are allowed to source information **ONLY** from the following 4 websites.
+**DO NOT check any other websites.**
 
-**CATEGORY 1: BEAUTY / COSMETICS / FRAGRANCE / SKINCARE**
-- **MANDATORY SOURCE**: You must search **EXCLUSIVELY on Sephora (sephora.com, sephora.nz)**.
-- **FORBIDDEN SOURCES**: **DO NOT** check EWG, Amazon, Ulta, Paula's Choice, or any other site. **EWG IS STRICTLY BANNED**.
-- **ACTION**: Simulate reading the "Ingredients" tab for this specific product on Sephora.
-- **IF NOT FOUND**: If the product is not currently sold on Sephora, return "sources": [].
+1. **www.sephora.nz** (For Beauty/Cosmetics/Fragrance)
+2. **woolworths.co.nz** (For Food/Groceries)
+3. **www.paknsave.co.nz** (For Food/Groceries)
+4. **www.newworld.co.nz** (For Food/Groceries)
 
-**CATEGORY 2: FOOD / BEVERAGE**
-- **MANDATORY SOURCE**: You must search **EXCLUSIVELY on New Zealand Supermarket websites** (e.g., `countdown.co.nz`, `newworld.co.nz`, `paknsave.co.nz`).
-- **FORBIDDEN SOURCES**: **DO NOT** use data from Walmart, Tesco, Amazon Fresh, or general "US/UK" versions of the product.
-- **GEOLOCATION LOCK**: If the product is sold globally (e.g. "Coke"), you must find the **NZ-specific formulation** listed on a NZ retailer site. If you cannot confirm the NZ version, return EMPTY.
+**INSTRUCTIONS**:
+1. Identify the product name.
+2. Check if it is listed on one of the above 4 sites.
+3. If found, read the ingredient list **EXACTLY** as it appears on that NZ website.
+4. If the product is NOT found on any of these 4 sites, return an empty list.
 
-**DATA EXTRACTION (ZERO TOLERANCE)**
-- **OCULAR VERIFICATION**: Only list ingredients you can "see" on the simulated page of the specific allowed domain.
-- **NO HALLUCINATIONS**: If the list is missing, hidden, or the product is out of stock on the NZ site, return EMPTY. Do not guess based on the US label.
+**CRITICAL RULE**:
+- **DO NOT** use data from US/UK/Global sites (No Sephora.com, No Walmart, No Amazon).
+- **ONLY NZ SITES** (ending in .nz or the specific domains listed above).
 
 **Output Format (JSON):**
 {
@@ -27,7 +29,7 @@ Analyze the image to identify the product.
   "analysisMethod": "MultiSource",
   "sources": [
      {
-       "name": "Sephora" (or NZ Store Name),
+       "name": "The Website Name" (e.g. "Sephora NZ", "Woolworths NZ"),
        "url": "Likely URL",
        "location": "Ingredients Tab",
        "ingredients": ["List", "of", "exact", "ingredients"]
