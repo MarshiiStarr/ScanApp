@@ -1,54 +1,42 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const PROMPT = `
-Analyze the image to identify the product.
+Identify the product in the image.
 
-**STRICT DOMAIN WHITELIST ONLY**:
-You are allowed to source information **ONLY** from the following 4 websites.
-**DO NOT check any other websites.**
+**TASK**: Find the **EXACT** ingredient list for this product using **Google Search**.
 
-1. **www.sephora.nz** (For Beauty/Cosmetics/Fragrance)
-2. **woolworths.co.nz** (For Food/Groceries)
-3. **www.paknsave.co.nz** (For Food/Groceries)
-4. **www.newworld.co.nz** (For Food/Groceries)
+**RESTRICTED DOMAINS (WHITELIST)**:
+1. **Beauty**: sephora.nz
+2. **Food**: woolworths.co.nz, paknsave.co.nz, newworld.co.nz
 
 **INSTRUCTIONS**:
-1. Identify the product name.
-2. Check if it is listed on one of the above 4 sites.
-3. If found, read the ingredient list **EXACTLY** as it appears on that NZ website.
-4. If the product is NOT found on any of these 4 sites, return an empty list.
+1. **SEARCH**: Perform a Google Search for: "{Product Name} ingredients site:{Allowed Domain}".
+   - *Example*: "Vimto ingredients site:woolworths.co.nz"
+2. **VERIFY**: Read the search snippets or page content.
+3. **EXTRACT**: Return the list found **specifically** on the allowed domain.
+4. **NO MATCH?**: If you cannot find a result on the allowed domain, returns "sources": []. **DO NOT GUESS.**
 
-**CRITICAL RULE**:
-- **DO NOT** use data from US/UK/Global sites (No Sephora.com, No Walmart, No Amazon).
-- **ONLY NZ SITES** (ending in .nz or the specific domains listed above).
-
-**Output Format (JSON):**
+**Output JSON**:
 {
-  "productName": "Exact Name",
+  "productName": "Name",
   "category": "Food" or "Cosmetic",
-  "analysisMethod": "MultiSource",
+  "analysisMethod": "LiveSearch",
   "sources": [
      {
-       "name": "The Website Name" (e.g. "Sephora NZ", "Woolworths NZ"),
-       "url": "Likely URL",
-       "location": "Ingredients Tab",
-       "ingredients": ["List", "of", "exact", "ingredients"]
+       "name": "Domain Found On",
+       "url": "Source URL",
+       "ingredients": ["List"]
      }
   ],
   "isVegan": boolean
 }
-
-Do not surround with markdown backticks. Just return raw JSON.
+Return raw JSON.
 `;
 
 export async function analyzeImage(imageSource, apiKey) {
-    if (!apiKey) {
-        throw new Error("API Key missing");
-    }
+    if (!apiKey) throw new Error("API Key missing");
 
     let base64Image = "";
-
-    // Handle Video Element
     if (imageSource.tagName === 'VIDEO') {
         const canvas = document.createElement("canvas");
         canvas.width = imageSource.videoWidth;
@@ -56,83 +44,56 @@ export async function analyzeImage(imageSource, apiKey) {
         const ctx = canvas.getContext("2d");
         ctx.drawImage(imageSource, 0, 0, canvas.width, canvas.height);
         base64Image = canvas.toDataURL("image/jpeg").split(',')[1];
-    }
-    // Handle File Object (Upload)
-    else if (imageSource instanceof File) {
-        base64Image = await new Promise((resolve, reject) => {
+    } else if (imageSource instanceof File) {
+        base64Image = await new Promise((resolve) => {
             const reader = new FileReader();
             reader.onload = () => resolve(reader.result.split(',')[1]);
-            reader.onerror = reject;
             reader.readAsDataURL(imageSource);
         });
-    }
-    // Handle Base64 String (Direct)
-    else if (typeof imageSource === 'string') {
-        // Allow passing raw base64 or data uri
+    } else if (typeof imageSource === 'string') {
         base64Image = imageSource.includes(',') ? imageSource.split(',')[1] : imageSource;
-    }
-    else {
+    } else {
         throw new Error("Invalid image source");
     }
 
-    // 3. Define models to try (Fallback strategy)
-    const modelsToTry = [
-        "gemini-2.5-flash",
-        "gemini-2.0-flash",
-        "gemini-1.5-flash",
-        "gemini-1.5-pro"
-    ];
     const genAI = new GoogleGenerativeAI(apiKey);
 
-    let lastError = null;
-
-    for (const modelName of modelsToTry) {
-        try {
-            console.log(`Attempting analysis with model: ${modelName}`);
-            const model = genAI.getGenerativeModel({ model: modelName });
-
-            const result = await model.generateContent([
-                PROMPT,
-                {
-                    inlineData: {
-                        data: base64Image,
-                        mimeType: "image/jpeg",
-                    },
+    // Use Pro model with Search Grounding enabled
+    const model = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash",
+        tools: [{
+            googleSearchRetrieval: {
+                dynamicRetrievalConfig: {
+                    mode: "MODE_DYNAMIC",
+                    dynamicThreshold: 0.7,
                 },
-            ]);
+            },
+        }]
+    });
 
-            const responseText = result.response.text();
-            console.log("Raw AI Response:", responseText);
+    try {
+        console.log("Analyzing with Live Google Search...");
+        const result = await model.generateContent([
+            PROMPT,
+            { inlineData: { data: base64Image, mimeType: "image/jpeg" } }
+        ]);
 
-            // Clean up markdown if present
-            const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-            const rawData = JSON.parse(cleanJson);
+        const responseText = result.response.text();
+        console.log("AI Response:", responseText);
 
-            // SANITIZE DATA (Prevent App Crashes)
-            // Ensure knowledgeSources is an array
-            if (rawData.knowledgeSources && !Array.isArray(rawData.knowledgeSources)) {
-                // If it's a string, wrap it. If it's something else, empty array.
-                rawData.knowledgeSources = typeof rawData.knowledgeSources === 'string'
-                    ? [rawData.knowledgeSources]
-                    : [];
-            }
-            // Ensure ingredients is an array
-            if (!Array.isArray(rawData.ingredients)) {
-                rawData.ingredients = [];
-            }
+        const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+        const rawData = JSON.parse(cleanJson);
 
-            return rawData;
+        // Sanitize
+        if (!Array.isArray(rawData.sources)) rawData.sources = [];
+        if (!rawData.ingredients) rawData.ingredients = []; // Fallback
 
-        } catch (error) {
-            console.warn(`Model ${modelName} failed:`, error);
-            lastError = error;
-            // Continue to next model
-        }
+        return rawData;
+
+    } catch (error) {
+        console.error("AI Search Failed:", error);
+        throw new Error(`Analysis Failed: ${error.message}`);
     }
-
-    // If we get here, all models failed
-    console.error("All AI models failed.");
-    throw new Error(`AI Analysis Failed. Verified API Key? (Error: ${lastError?.message})`);
 }
 
 // Diagnostic Tool
