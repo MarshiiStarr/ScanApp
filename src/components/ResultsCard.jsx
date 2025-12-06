@@ -11,12 +11,20 @@ export function ResultsCard({ results, onClose }) {
 
     if (!results) return null;
 
+    const listRef = React.useRef(null);
+
     const handleTouchStart = (e) => {
-        // Only allow drag if we are at the top of the scroll
-        if (cardRef.current && cardRef.current.scrollTop === 0) {
-            startY.current = e.touches[0].clientY;
-            setIsDragging(true);
+        // Find the scrollable list element
+        const listElement = listRef.current;
+
+        // If we have a list and it's scrolled down (scrollTop > 0), DO NOT drag.
+        // We only allow dragging if we are at the very top.
+        if (listElement && listElement.scrollTop > 0) {
+            return;
         }
+
+        startY.current = e.touches[0].clientY;
+        setIsDragging(true);
     };
 
     const handleTouchMove = (e) => {
@@ -147,7 +155,7 @@ export function ResultsCard({ results, onClose }) {
                 </div>
                 <button onClick={onClose} className="close-button">×</button>
             </div>
-            <ul className="ingredients-list">
+            <ul className="ingredients-list" ref={listRef}>
                 {results.ingredients && results.ingredients.length > 0 ? (
                     results.ingredients.map((item, index) => (
                         <ExpandableIngredient key={index} item={item} />
