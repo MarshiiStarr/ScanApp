@@ -4,7 +4,10 @@ const PROMPT = `
 Analyze this image. If it contains **Food** OR **Cosmetics/Makeup** products, list the main ingredients.
 Format your response as a simple JSON object with keys "productName", "ingredients", "isVegan", and "sourceUrl".
 - "productName": A short name of the product.
-- "sourceUrl": A valid URL to the official product page, OpenFoodFacts, or a retailer page where these ingredients can be verified. If unknown, use null.
+- "sourceUrl": A specific URL to a **detailed ingredient analysis** page.
+  - **PRIORITIZE**: INCIDecoder.com (for cosmetics), OpenFoodFacts.org (for food), or SkinCarisma.
+  - **AVOID**: Generic retailer pages (like Amazon, Walmart, Sephora) unless they display the full INCI list.
+  - If no specific analysis page is known, return **null** (so the app can default to a smart search).
 - "isVegan": Boolean (true/false). True ONLY if the product appears free of all animal-derived ingredients (meat, dairy, eggs, honey, beeswax, lanolin, carmine, etc).
 - "ingredients": Array of objects with "name", optional "warning", and optional "description".
 - IMPORTANT: Check for these allergens in ALL products (Food & Cosmetics):
