@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from "openai";
 
 const PROMPT = `
 Analyze this image. If it contains food or a product with ingredients, list the main ingredients.
@@ -31,57 +31,44 @@ export async function analyzeImage(videoElement, apiKey) {
 
     // 2. Convert to base64 (jpeg)
     const base64Image = canvas.toDataURL("image/jpeg").split(',')[1];
+    const dataUrl = `data:image/jpeg;base64,${base64Image}`;
 
-    // 3. Define models to try
-    // We try specific versions to avoid ambiguity
-    const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-pro"];
-    const genAI = new GoogleGenerativeAI(apiKey);
+    // 3. Call OpenAI API
+    const openai = new OpenAI({
+        apiKey: apiKey,
+        dangerouslyAllowBrowser: true // Required for client-side usage
+    });
 
-    let lastError = null;
-
-    for (const modelName of modelsToTry) {
-        try {
-            console.log(`Attempting analysis with model: ${modelName}`);
-            const model = genAI.getGenerativeModel({ model: modelName });
-
-            const result = await model.generateContent([
-                PROMPT,
-                {
-                    inlineData: {
-                        data: base64Image,
-                        mimeType: "image/jpeg",
-                    },
-                },
-            ]);
-
-            const responseText = result.response.text();
-            console.log("Raw AI Response:", responseText);
-
-            // Clean up markdown if present
-            const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-            return JSON.parse(cleanJson);
-
-        } catch (error) {
-            console.warn(`Model ${modelName} failed:`, error);
-            lastError = error;
-            // Continue to next model
-        }
-    }
-
-    // If we get here, all models failed
-    console.error("All AI models failed.");
-
-    // Diagnostic: Check what models ARE available directly
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-        const data = await response.json();
-        if (data && data.models) {
-            const available = data.models.map(m => m.name.replace('models/', '')).join(', ');
-            throw new Error(`Models 404. Your Key sees: ${available}`);
-        }
-    } catch (diagError) {
-        console.error("Diagnostic failed", diagError);
-    }
+        const response = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+                {
+                    role: "user",
+                    content: [
+                        { type: "text", text: PROMPT },
+                        {
+                            type: "image_url",
+                            image_url: {
+                                url: dataUrl,
+                                detail: "low" // 'low' is faster and cheaper, usually sufficient for text
+                            },
+                        },
+                    ],
+                },
+            ],
+            max_tokens: 500,
+        });
 
-    throw new Error(`AI Analysis Failed. Verified API Key? (Error: ${lastError.message})`);
+        const responseText = response.choices[0].message.content;
+        console.log("Raw AI Response:", responseText);
+
+        // Clean up markdown if present
+        const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+        return JSON.parse(cleanJson);
+
+    } catch (error) {
+        console.error("AI Analysis Failed:", error);
+        throw new Error(error.message || "Failed to analyze image");
+    }
 }
