@@ -137,8 +137,7 @@ export function ResultsCard({ results, onClose }) {
                         </div>
                     )}
 
-                        </div>
-                    )}
+
 
                     {results.analysisMethod === 'ConsensusSearch' && (
                         <div style={{
@@ -151,13 +150,13 @@ export function ResultsCard({ results, onClose }) {
                             color: '#00ccff',
                             textAlign: 'left'
                         }}>
-                             <strong>☁️ Consensus Search:</strong> Analyzed across {results.sourcesChecked ? results.sourcesChecked.length : 'multiple'} major sites.
-                             <details>
-                                <summary style={{cursor:'pointer', marginTop:'4px', opacity:0.8}}>View Sources</summary>
-                                <div style={{marginTop:'4px', fontSize:'0.75rem', opacity:0.75}}>
+                            <strong>☁️ Consensus Search:</strong> Analyzed across {results.sourcesChecked ? results.sourcesChecked.length : 'multiple'} major sites.
+                            <details>
+                                <summary style={{ cursor: 'pointer', marginTop: '4px', opacity: 0.8 }}>View Sources</summary>
+                                <div style={{ marginTop: '4px', fontSize: '0.75rem', opacity: 0.75 }}>
                                     {results.sourcesChecked?.join(', ')}
                                 </div>
-                             </details>
+                            </details>
                         </div>
                     )}
                 </div>
@@ -227,24 +226,23 @@ function ExpandableIngredient({ item }) {
                         {item.commonality || item.consensus}
                     </span>
                 )}
+                {item.warning && <span className="ingredient-warning">⚠️ {item.warning}</span>}
             </div>
-            {item.warning && <span className="ingredient-warning">⚠️ {item.warning}</span>}
-        </div>
             {
-        expanded && item.description && (
-            <div style={{
-                marginTop: '8px',
-                fontSize: '0.9rem',
-                color: 'rgba(255,255,255,0.7)',
-                background: 'rgba(255,255,255,0.05)',
-                padding: '8px',
-                borderRadius: '8px',
-                width: '100%'
-            }}>
-                {item.description}
-            </div>
-        )
-    }
+                expanded && item.description && (
+                    <div style={{
+                        marginTop: '8px',
+                        fontSize: '0.9rem',
+                        color: 'rgba(255,255,255,0.7)',
+                        background: 'rgba(255,255,255,0.05)',
+                        padding: '8px',
+                        borderRadius: '8px',
+                        width: '100%'
+                    }}>
+                        {item.description}
+                    </div>
+                )
+            }
         </li >
     );
 }
