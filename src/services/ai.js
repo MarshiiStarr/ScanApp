@@ -3,21 +3,21 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const PROMPT = `
 Identify the product in the image.
 
-**GOAL**: Find the **exact ingredient list** for this product sold in **New Zealand**.
+**GOAL**: Find the **exact ingredient list** for this product.
 
 **CRITICAL STRATEGY**: 
 You **MUST** use the Google Search tool.
-1. **Identify** the product name and brand from the image.
-2. **SEARCH** for the ingredients using these *specific* queries. Run multiple searches if needed:
-   - \`"{Product Name}" ingredients site:woolworths.co.nz\`
-   - \`"{Product Name}" ingredients site:paknsave.co.nz\`
-   - \`"{Product Name}" ingredients site:newworld.co.nz\`
-   - \`"{Product Name}" ingredients site:chemistwarehouse.co.nz\` (if health/beauty)
-   - \`"{Product Name}" ingredients New Zealand\`
+1. **Identify** the product name and brand.
+2. **SEARCH** (Broad + Specific):
+   - Query 1: \`"{Product Name}" ingredients New Zealand\`
+   - Query 2: \`"{Product Name}" ingredients woolworths paknsave\`
+   - Query 3: \`"{Product Name}" ingredients\` (Global fallback)
 
-3. **EXTRACT**: Look for the "Ingredients" section on the pages you find. 
-   - IGNORE generic nutritional claims (like "High in protein").
-   - EXTRACT the full comma-separated list of ingredients.
+3. **EXTRACT & PRIORITIZE**:
+   - **TIER 1 (Best)**: Official NZ Supermarkets (Woolworths NZ, Pak'nSave, New World).
+   - **TIER 2 (Good)**: NZ Pharmacies/Retailers (Chemist Warehouse NZ, The Warehouse, Sephora NZ).
+   - **TIER 3 (Fallback)**: Australian Supermarkets (Woolworths AU, Coles) - *Mark as Australian in source name*.
+   - **TIER 4 (Last Resort)**: Manufacturer sites or global retailers (Amazon, Tesco).
 
 **OUTPUT SCHEMA (JSON)**:
 {
@@ -25,17 +25,18 @@ You **MUST** use the Google Search tool.
   "category": "Food" or "Cosmetic",
   "sources": [
      {
-       "name": "Woolworths NZ", 
-       "url": "https://www.woolworths.co.nz/...",
+       "name": "Source Name (e.g. Woolworths NZ)", 
+       "url": "URL",
        "ingredients": ["Ingredient 1", "Ingredient 2", "..."]
      }
   ],
   "isVegan": boolean,
-  "summary": "Found at [Store Name]. Ingredients include..." (OR "Could not find this product at NZ supermarkets.")
+  "summary": "Found at [Source]. Ingredients: [Summary]..."
 }
 
 **RULES**:
-- If you cannot find the product on an NZ site, try to find the **Australian** version (woolworths.com.au) as they are often identical, but note this in the summary.
+- **NEVER** return an empty list if *any* reliable source is found. ALWAYS fall back to Tier 3/4 if Tier 1/2 fails.
+- If using a non-NZ source, mention it in the summary (e.g. "Using Australian data").
 - Return **ONLY JSON**.
 `;
 
