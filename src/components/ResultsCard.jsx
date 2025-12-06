@@ -9,7 +9,24 @@ export function ResultsCard({ results, onClose }) {
             <div className="results-header">
                 <div>
                     <h2 style={{ fontSize: '0.9rem', opacity: 0.7, textTransform: 'uppercase', letterSpacing: '1px' }}>Detected</h2>
-                    <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '2px 0 0 0' }}>{results.productName || "Ingredients Found"}</h1>
+                    <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '2px 0 5px 0' }}>{results.productName || "Ingredients Found"}</h1>
+                    {results.productName && (
+                        <a
+                            href={`https://www.google.com/search?q=${encodeURIComponent(results.productName + " ingredients nutrition facts")}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                                color: 'var(--primary-accent)',
+                                fontSize: '0.9rem',
+                                textDecoration: 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '5px'
+                            }}
+                        >
+                            <span>ℹ️ See Full Details Online</span>
+                        </a>
+                    )}
                 </div>
                 <button onClick={onClose} className="close-button">×</button>
             </div>
