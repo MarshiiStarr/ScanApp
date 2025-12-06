@@ -105,10 +105,10 @@
 /* Modern Top Bar */
 .top-bar {
   position: absolute;
-  top: 60px;
-  /* Much lower to clear status bars/notches */
-  right: 35px;
-  /* Further from edge */
+  top: 80px;
+  /* Safe zone: really far down now */
+  right: 40px;
+  /* Safe zone: really far in */
   display: flex;
   gap: 20px;
   z-index: 50;
