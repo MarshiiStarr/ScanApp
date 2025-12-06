@@ -21,6 +21,26 @@ export function ResultsCard({ results, onClose }) {
                     </li>
                 ))}
             </ul>
+
+            <button
+                onClick={onClose}
+                className="scan-again-btn"
+                style={{
+                    marginTop: '20px',
+                    padding: '16px',
+                    background: 'var(--text-primary)',
+                    color: 'black',
+                    border: 'none',
+                    borderRadius: '12px',
+                    fontSize: '1rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    width: '100%',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                }}
+            >
+                Scan New Item
+            </button>
         </div>
     );
 }
