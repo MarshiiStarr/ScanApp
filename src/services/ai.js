@@ -94,7 +94,22 @@ export async function analyzeImage(imageSource, apiKey) {
 
             // Clean up markdown if present
             const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-            return JSON.parse(cleanJson);
+            const rawData = JSON.parse(cleanJson);
+
+            // SANITIZE DATA (Prevent App Crashes)
+            // Ensure knowledgeSources is an array
+            if (rawData.knowledgeSources && !Array.isArray(rawData.knowledgeSources)) {
+                // If it's a string, wrap it. If it's something else, empty array.
+                rawData.knowledgeSources = typeof rawData.knowledgeSources === 'string'
+                    ? [rawData.knowledgeSources]
+                    : [];
+            }
+            // Ensure ingredients is an array
+            if (!Array.isArray(rawData.ingredients)) {
+                rawData.ingredients = [];
+            }
+
+            return rawData;
 
         } catch (error) {
             console.warn(`Model ${modelName} failed:`, error);
