@@ -31,12 +31,20 @@ export function ResultsCard({ results, onClose }) {
                 <button onClick={onClose} className="close-button">×</button>
             </div>
             <ul className="ingredients-list">
-                {results.ingredients.map((item, index) => (
-                    <li key={index} className="ingredient-item">
-                        <span className="ingredient-name">{item.name}</span>
-                        {item.warning && <span className="ingredient-warning">⚠️ {item.warning}</span>}
+                {results.ingredients && results.ingredients.length > 0 ? (
+                    results.ingredients.map((item, index) => (
+                        <li key={index} className="ingredient-item">
+                            <span className="ingredient-name">{item.name}</span>
+                            {item.warning && <span className="ingredient-warning">⚠️ {item.warning}</span>}
+                        </li>
+                    ))
+                ) : (
+                    <li className="ingredient-item" style={{ flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '30px', opacity: 0.6 }}>
+                        <span style={{ fontSize: '2rem', marginBottom: '10px' }}>🕵️‍♀️</span>
+                        <span>Ingredients text not found.</span>
+                        <span style={{ fontSize: '0.8rem', marginTop: '5px' }}>Check the "Full Details" link above.</span>
                     </li>
-                ))}
+                )}
             </ul>
 
             <button

@@ -10,6 +10,7 @@ Format your response as a simple JSON object with keys "productName" and "ingred
   2. EGG (Egg, Albumin, Globulin, Ovum, Lysozyme, Ovalbumin, etc.)
   3. CINNAMON (Cinnamon, Cinnamal, Cinnamyl Alcohol, Cinnamates, Benzyl Cinnamate, etc.)
 - Do NOT flag anything else (like Sugar/Peanuts/Parabens).
+- FALLBACK: If the ingredient text is unreadable or hidden, but you recognize the product (e.g. "Head & Shoulders"), list the **standard known ingredients** for that product from your knowledge base.
 - Example: { "name": "Amyl Cinnamal", "warning": "Cinnamon Derivative" }, { "name": "Water" }
 If the image is NOT food or a product, return:
 { "productName": "Unknown", "ingredients": [], "error": "No food/product detected" }
