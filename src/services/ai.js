@@ -1,36 +1,39 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const PROMPT = `
-Analyze this image. If it contains **Food** OR **Cosmetics/Makeup** products, identify the product.
+Analyze the image to identify the product.
 
-**MODE: MULTI-SOURCE VERIFICATION**
-1. Identify the product name and variant.
-2. Recall the ingredient lists for this product as listed on the **Top Popular Websites** (e.g. Amazon, Sephora, Ulta, Target, EWG, Paulas Choice, Official Brand Site).
-3. **Group** the data by Source.
+**STRICT SOURCING PROTOCOL**:
 
-Format your response as a JSON object:
+**CATEGORY 1: BEAUTY / COSMETICS / FRAGRANCE / SKINCARE**
+- **MANDATORY SOURCE**: You must search **EXCLUSIVELY on Sephora (sephora.com, sephora.nz)**.
+- **FORBIDDEN SOURCES**: **DO NOT** check EWG, Amazon, Ulta, Paula's Choice, or any other site. **EWG IS STRICTLY BANNED**.
+- **ACTION**: Simulate reading the "Ingredients" tab for this specific product on Sephora.
+- **IF NOT FOUND**: If the product is not currently sold on Sephora, return "sources": [].
+
+**CATEGORY 2: FOOD / BEVERAGE**
+- **MANDATORY SOURCE**: You must search **EXCLUSIVELY on New Zealand Supermarkets** (Woolworths NZ, New World, Pak'nSave).
+- **FORBIDDEN SOURCES**: Do NOT check Walmart, Target, or US sites.
+
+**DATA EXTRACTION (ZERO TOLERANCE)**
+- **OCULAR VERIFICATION**: Only list ingredients you can "see" on the simulated page.
+- **NO HALLUCINATIONS**: If the list is missing, hidden, or the product is out of stock, return EMPTY. Do not guess.
+
+**Output Format (JSON):**
 {
-  "productName": "String",
+  "productName": "Exact Name",
   "category": "Food" or "Cosmetic",
   "analysisMethod": "MultiSource",
   "sources": [
-  "sources": [
-    {
-      "name": "Source Name" (e.g. "Sephora", "EWG"),
-      "url": "Exact Product Page URL" (or generic search URL if unknown),
-      "location": "Context" (e.g. "Ingredients Tab", "Back of Bottle", "Description"),
-      "ingredients": ["Water", "Glycerin", "Fragrance"]
-    }
+     {
+       "name": "Sephora" (or NZ Store Name),
+       "url": "Likely URL",
+       "location": "Ingredients Tab",
+       "ingredients": ["List", "of", "exact", "ingredients"]
+     }
   ],
-  "isVegan": Boolean
+  "isVegan": boolean
 }
-
-- **ZERO TOLERANCE FOR HALLUCINATIONS**:
-    - **DO NOT GUESS**. Do NOT list ingredients because they are "usually" in this product.
-    - **DO NOT INFER**. Do NOT use your general knowledge of the product formula.
-    - **SIMULATED OCR ONLY**: You must act as if you are reading the text on the specific website page.
-    - **IF NOT FOUND, RETURN EMPTY**: If you cannot confirm the specific text list for a source, return an empty ingredients array [] for that source. One accurate source is better than 5 guessed ones.
-    - **AVAILABILITY CHECK**: Prioritize sources where the product is likely **Currently Sold/Active**. Avoid listing sources if the product is known to be Discontinued or "Out of Stock" on that site.
 
 Do not surround with markdown backticks. Just return raw JSON.
 `;
