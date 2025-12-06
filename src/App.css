@@ -22,9 +22,40 @@
   pointer-events: none;
 }
 
+.controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+.gallery-button {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: white;
+  z-index: 20;
+}
+
+.gallery-button:active {
+  transform: scale(0.9);
+  background: rgba(255, 255, 255, 0.25);
+}
+
 .scan-button-wrapper {
   position: relative;
-  margin-bottom: 15px;
+  /* margin-bottom removed as row handles it */
 }
 
 .scan-button {

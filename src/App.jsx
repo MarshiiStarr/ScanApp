@@ -21,7 +21,7 @@ function App() {
     }
   }, []);
 
-  const handleScan = async () => {
+  const handleScan = async (file = null) => {
     if (scanning) return;
 
     const apiKey = localStorage.getItem('gemini_api_key');
@@ -34,9 +34,10 @@ function App() {
     setResults(null);
 
     try {
-      if (!videoRef.current) throw new Error("Camera not ready");
+      const source = file || videoRef.current;
+      if (!source) throw new Error("No image source");
 
-      const data = await analyzeImage(videoRef.current, apiKey);
+      const data = await analyzeImage(source, apiKey);
 
       if (data.error) {
         // Handle case where AI didn't see food
@@ -65,14 +66,31 @@ function App() {
       <button className="settings-btn" onClick={() => setIsSettingsOpen(true)}>⚙️</button>
 
       <div className={`controls ${results ? 'hidden' : ''}`}>
-        <div className="scan-button-wrapper">
-          <button
-            className={`scan-button ${scanning ? 'active' : ''}`}
-            onClick={handleScan}
-            disabled={scanning}
-          >
-            <div className="scan-inner" />
-          </button>
+        <div className="controls-row">
+          <label className="gallery-button">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                if (e.target.files[0]) handleScan(e.target.files[0]);
+              }}
+              disabled={scanning}
+              style={{ display: 'none' }}
+            />
+            🖼️
+          </label>
+
+          <div className="scan-button-wrapper">
+            <button
+              className={`scan-button ${scanning ? 'active' : ''}`}
+              onClick={() => handleScan()}
+              disabled={scanning}
+            >
+              <div className="scan-inner" />
+            </button>
+          </div>
+
+          <div className="spacer" style={{ width: 50 }}></div>
         </div>
         <div className="controls-text">
           {scanning ? 'Analyzing...' : 'Tap safely to Scan'}

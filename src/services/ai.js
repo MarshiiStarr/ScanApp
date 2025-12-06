@@ -11,37 +11,9 @@ Example:
     { "name": "Sugar", "warning": "High Sugar" },
     { "name": "Peanuts", "warning": "Allergen" }
   ]
-}
-If the image is NOT food or a product, return:
-{ "ingredients": [], "error": "No food/product detected" }
-Do not surround with markdown backticks. Just return raw JSON.
-`;
-
-export async function analyzeImage(videoElement, apiKey) {
-    if (!apiKey) {
-        throw new Error("API Key missing");
-    }
-
-    // 1. Capture image from video
-    const canvas = document.createElement("canvas");
-    canvas.width = videoElement.videoWidth;
-    canvas.height = videoElement.videoHeight;
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-
-    // 2. Convert to base64 (jpeg)
-    const base64Image = canvas.toDataURL("image/jpeg").split(',')[1];
-
-    // 3. Define models to try (Fallback strategy)
-    // We try specific versions to avoid ambiguity
-    const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-pro"];
-    const genAI = new GoogleGenerativeAI(apiKey);
-
-    let lastError = null;
-
     for (const modelName of modelsToTry) {
         try {
-            console.log(`Attempting analysis with model: ${modelName}`);
+            console.log(`Attempting analysis with model: ${ modelName } `);
             const model = genAI.getGenerativeModel({ model: modelName });
 
             const result = await model.generateContent([
@@ -58,19 +30,19 @@ export async function analyzeImage(videoElement, apiKey) {
             console.log("Raw AI Response:", responseText);
 
             // Clean up markdown if present
-            const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-            return JSON.parse(cleanJson);
+            const cleanJson = responseText.replace(/```json / g, '').replace(/```/g, '').trim();
+return JSON.parse(cleanJson);
 
         } catch (error) {
-            console.warn(`Model ${modelName} failed:`, error);
-            lastError = error;
-            // Continue to next model
-        }
+    console.warn(`Model ${modelName} failed:`, error);
+    lastError = error;
+    // Continue to next model
+}
     }
 
-    // If we get here, all models failed
-    console.error("All AI models failed.");
-    throw new Error(`AI Analysis Failed. Verify API Key settings. (Error: ${lastError?.message})`);
+// If we get here, all models failed
+console.error("All AI models failed.");
+throw new Error(`AI Analysis Failed. Verify API Key settings. (Error: ${lastError?.message})`);
 }
 
 // Diagnostic Tool
