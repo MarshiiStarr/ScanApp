@@ -103,7 +103,14 @@ function App() {
       }
 
       // Analyze the source (File or Base64 String)
-      const data = await analyzeImage(source, apiKey);
+      // Enforce a minimum delay of 1.5 seconds for better UX
+      const startTime = Date.now();
+      const minDelayPromise = new Promise(resolve => setTimeout(resolve, 1500));
+
+      const [data] = await Promise.all([
+        analyzeImage(source, apiKey),
+        minDelayPromise
+      ]);
 
       if (data.error) {
         setResults({ ingredients: [{ name: "Error: " + data.error, warning: "Try again" }] });

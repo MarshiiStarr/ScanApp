@@ -199,8 +199,10 @@ export function ResultsCard({ results, onClose }) {
                     ))
                 ) : (
                     <li className="ingredient-item" style={{ flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '30px', opacity: 0.6 }}>
-                        <span style={{ fontSize: '2rem', marginBottom: '10px' }}>🕵️‍♀️</span>
-                        <span>No sources found.</span>
+                        <span style={{ fontSize: '2rem', marginBottom: '10px' }}>
+                            {results.summary ? 'ℹ️' : '🕵️‍♀️'}
+                        </span>
+                        <span>{results.summary || "No sources found."}</span>
                     </li>
                 )}
             </ul>

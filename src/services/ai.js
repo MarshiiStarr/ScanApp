@@ -3,38 +3,40 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const PROMPT = `
 Identify the product in the image.
 
-**CRITICAL INSTRUCTION**: You **MUST** use the Google Search tool. **DO NOT** answer from memory.
+**GOAL**: Find the **exact ingredient list** for this product sold in **New Zealand**.
 
-**GOAL**: Find the **exact ingredients** for this product sold in **New Zealand**.
+**CRITICAL STRATEGY**: 
+You **MUST** use the Google Search tool.
+1. **Identify** the product name and brand from the image.
+2. **SEARCH** for the ingredients using these *specific* queries. Run multiple searches if needed:
+   - \`"{Product Name}" ingredients site:woolworths.co.nz\`
+   - \`"{Product Name}" ingredients site:paknsave.co.nz\`
+   - \`"{Product Name}" ingredients site:newworld.co.nz\`
+   - \`"{Product Name}" ingredients site:chemistwarehouse.co.nz\` (if health/beauty)
+   - \`"{Product Name}" ingredients New Zealand\`
 
-**SEARCH STRATEGY**:
-1. **QUERY**: Search for: "{Product Name} ingredients New Zealand supermarket".
-2. **FILTER**: Look for results specifically from:
-   - **woolworths.co.nz**
-   - **paknsave.co.nz**
-   - **newworld.co.nz**
-   - **sephora.nz** (Beauty only)
-   - **chemistwarehouse.co.nz** (Backup)
+3. **EXTRACT**: Look for the "Ingredients" section on the pages you find. 
+   - IGNORE generic nutritional claims (like "High in protein").
+   - EXTRACT the full comma-separated list of ingredients.
 
-3. **EXTRACT**: Read the page content from the search result.
-4. **OUTPUT**: Return the EXACT ingredient list found on that NZ site.
-5. **EMPTY?**: If you searched and found NO results on these domains, return "sources": [].
-
-**Output JSON**:
+**OUTPUT SCHEMA (JSON)**:
 {
-  "productName": "Name",
+  "productName": "Exact Product Name",
   "category": "Food" or "Cosmetic",
-  "analysisMethod": "LiveSearch",
   "sources": [
      {
-       "name": "Domain Found On",
-       "url": "Specific Page URL",
-       "ingredients": ["List"]
+       "name": "Woolworths NZ", 
+       "url": "https://www.woolworths.co.nz/...",
+       "ingredients": ["Ingredient 1", "Ingredient 2", "..."]
      }
   ],
-  "isVegan": boolean
+  "isVegan": boolean,
+  "summary": "Found at [Store Name]. Ingredients include..." (OR "Could not find this product at NZ supermarkets.")
 }
-Return raw JSON.
+
+**RULES**:
+- If you cannot find the product on an NZ site, try to find the **Australian** version (woolworths.com.au) as they are often identical, but note this in the summary.
+- Return **ONLY JSON**.
 `;
 
 export async function analyzeImage(imageSource, apiKey) {
@@ -62,16 +64,15 @@ export async function analyzeImage(imageSource, apiKey) {
 
     const genAI = new GoogleGenerativeAI(apiKey);
 
-    // FORCE SEARCH: Remove dynamic threshold to ensure tool use
     const model = genAI.getGenerativeModel({
         model: "gemini-1.5-flash",
         tools: [{
-            googleSearchRetrieval: {} // Default settings = standard grounding
+            googleSearchRetrieval: {} // Default settings
         }]
     });
 
     try {
-        console.log("Analyzing with FORCED Live Google Search...");
+        console.log("Analyzing with Live Google Search...");
         const result = await model.generateContent([
             PROMPT,
             { inlineData: { data: base64Image, mimeType: "image/jpeg" } }
@@ -81,11 +82,23 @@ export async function analyzeImage(imageSource, apiKey) {
         console.log("AI Response:", responseText);
 
         const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-        const rawData = JSON.parse(cleanJson);
+
+        let rawData;
+        try {
+            rawData = JSON.parse(cleanJson);
+        } catch (e) {
+            console.warn("JSON Parse Failed, attempting fallback", e);
+            // Fallback: Try to construct a valid object from the text if possible, or just return an error object
+            rawData = {
+                productName: "Scan completed (Parse Error)",
+                sources: [],
+                summary: "We found information but couldn't format it perfectly. Please try scanning again."
+            };
+        }
 
         // Sanitize
         if (!Array.isArray(rawData.sources)) rawData.sources = [];
-        if (!rawData.ingredients) rawData.ingredients = [];
+        if (!rawData.ingredients) rawData.ingredients = []; // Backwards compat
 
         return rawData;
 
