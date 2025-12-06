@@ -17,14 +17,13 @@ Format your response as a simple JSON object with keys "productName", "category"
   2. EGG (Egg, Albumin, Globulin, Ovum, Lysozyme, Ovalbumin, etc.)
   3. CINNAMON & CINNAMATES (Cinnamal, Cinnamyl Alcohol, Benzyl Cinnamate, Octinoxate, Octocrylene, Cinoxate, Octyl Methoxycinnamate).
   4. SALICYLATES (Salicylic Acid, Benzyl Salicylate, Homosalate, Octyl Salicylate, Trolamine Salicylate, Phenyl Salicylate, Amyl Salicylate).
-- **SOURCE PRIORITY**: Prioritize information from **EWG.org**, **PaulasChoice.com**, **CosmeticsInfo.org**, and **Incipedia**.
-- **ACCURACY RULE**: In "KnowledgeBase" mode, do NOT list specific chemical allergens (like Benzyl Salicylate) unless you are certain they are in this specific variant.
-- **Connection**: If you flag a specific allergen (like Benzyl Salicylate) that is often hidden inside "Fragrance", explicitly say so in the warning (e.g. "Warning: Likely present inside Fragrance/Parfum").
-- **DEEP DIVE**: If an ingredient is vague (e.g. "Fragrance", "Parfum", "Flavor", "Spices"), add a "description" field explaining what it likely hides.
-  - Example: { "name": "Fragrance", "warning": "Potential Risk", "description": "Fragrance mixes often contain hidden allergens like Cinnamal or Limonene." }
-- Do NOT flag anything else (like Sugar/Peanuts/Parabens).
-- FALLBACK: If the ingredient text is unreadable or hidden, but you recognize the product (e.g. "Head & Shoulders"), list the **standard known ingredients** for that product from your knowledge base.
-- Example: { "name": "Amyl Cinnamal", "warning": "Cinnamon Derivative" }, { "name": "Water" }
+- **STRICT SOURCING**: You are restricted to knowledge explicitly found on **EWG.org**, **PaulasChoice.com**, **CosmeticsInfo.org**, and **Incipedia**.
+- **ANTI-HALLUCINATION**: Do **NOT** list ingredients based on "common formulations" or "standard brand ingredients" if you cannot verify the exact variant.
+- If you recognize the product but cannot recall the *exact* ingredient list from the allowed sources:
+  - Return `ingredients: []`.
+  - Set `reasoning` to: "Product recognized, but exact formula not found in verifiable sources (EWG/PaulasChoice)."
+  - Do NOT guess.
+- **Connection**: If you are certain an ingredient is present, flag allergens. If you flag a specific allergen (like Benzyl Salicylate) that is often hidden inside "Fragrance", explicitly say so in the warning (e.g. "Warning: Likely present inside Fragrance/Parfum").
 If the image is NOT food or a product, return:
 { "productName": "Unknown", "ingredients": [], "error": "No food/product detected" }
 Do not surround with markdown backticks. Just return raw JSON.
