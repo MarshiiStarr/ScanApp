@@ -8,7 +8,24 @@ export function ResultsCard({ results, onClose }) {
         <div className="results-card">
             <div className="results-header">
                 <div>
-                    <h2 style={{ fontSize: '0.9rem', opacity: 0.7, textTransform: 'uppercase', letterSpacing: '1px' }}>Detected</h2>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <h2 style={{ fontSize: '0.9rem', opacity: 0.7, textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>Detected</h2>
+                        {results.isVegan && (
+                            <span style={{
+                                backgroundColor: '#2ecc71',
+                                color: 'black',
+                                padding: '2px 8px',
+                                borderRadius: '12px',
+                                fontSize: '0.75rem',
+                                fontWeight: 'bold',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                            }}>
+                                🌱 Vegan
+                            </span>
+                        )}
+                    </div>
                     <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '2px 0 5px 0' }}>{results.productName || "Ingredients Found"}</h1>
                     {results.productName && (
                         <a

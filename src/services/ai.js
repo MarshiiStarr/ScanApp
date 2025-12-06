@@ -2,8 +2,9 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const PROMPT = `
 Analyze this image. If it contains **Food** OR **Cosmetics/Makeup** products, list the main ingredients.
-Format your response as a simple JSON object with keys "productName" and "ingredients".
+Format your response as a simple JSON object with keys "productName", "ingredients", and "isVegan".
 - "productName": A short name of the product.
+- "isVegan": Boolean (true/false). True ONLY if the product appears free of all animal-derived ingredients (meat, dairy, eggs, honey, beeswax, lanolin, carmine, etc).
 - "ingredients": Array of objects with "name", optional "warning", and optional "description".
 - IMPORTANT: Check for these allergens in ALL products (Food & Cosmetics):
   1. DAIRY (Milk, Casein, Whey, Lactose, Cream, Butter, Cheese, Lactoferrin, etc.)
