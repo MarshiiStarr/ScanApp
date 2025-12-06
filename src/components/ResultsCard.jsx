@@ -29,7 +29,11 @@ export function ResultsCard({ results, onClose }) {
                     <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '2px 0 5px 0' }}>{results.productName || "Ingredients Found"}</h1>
                     {results.productName && (
                         <a
-                            href={results.sourceUrl || `https://www.google.com/search?q=${encodeURIComponent(results.productName + " ingredients nutrition facts")}`}
+                            href={
+                                results.category === 'Cosmetic'
+                                    ? `https://www.google.com/search?q=${encodeURIComponent(results.productName + " ingredients site:incidecoder.com OR site:skincarisma.com")}`
+                                    : `https://www.google.com/search?q=${encodeURIComponent(results.productName + " ingredients site:openfoodfacts.org")}`
+                            }
                             target="_blank"
                             rel="noopener noreferrer"
                             style={{
@@ -42,7 +46,7 @@ export function ResultsCard({ results, onClose }) {
                             }}
                         >
                             <span>
-                                {results.sourceUrl ? `🔗 Source: ${new URL(results.sourceUrl).hostname.replace('www.', '')}` : "🔎 Search for Details"}
+                                {results.category === 'Cosmetic' ? "🧪 View on INCIDecoder" : "🍎 View on OpenFoodFacts"}
                             </span>
                         </a>
                     )}
