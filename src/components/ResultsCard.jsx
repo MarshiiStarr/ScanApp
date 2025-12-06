@@ -139,40 +139,66 @@ export function ResultsCard({ results, onClose }) {
 
 
 
-                    {results.analysisMethod === 'ConsensusSearch' && (
+                    {results.analysisMethod === 'MultiSource' && (
                         <div style={{
                             marginTop: '10px',
                             padding: '8px',
-                            background: 'rgba(0, 200, 255, 0.1)',
-                            border: '1px solid rgba(0, 200, 255, 0.3)',
+                            background: 'rgba(0, 255, 150, 0.1)',
+                            border: '1px solid rgba(0, 255, 150, 0.3)',
                             borderRadius: '6px',
                             fontSize: '0.8rem',
-                            color: '#00ccff',
+                            color: '#00ff96',
                             textAlign: 'left'
                         }}>
-                            <strong>☁️ Consensus Search:</strong> Analyzed across {results.sourcesChecked ? results.sourcesChecked.length : 'multiple'} major sites.
-                            <details>
-                                <summary style={{ cursor: 'pointer', marginTop: '4px', opacity: 0.8 }}>View Sources</summary>
-                                <div style={{ marginTop: '4px', fontSize: '0.75rem', opacity: 0.75 }}>
-                                    {results.sourcesChecked?.join(', ')}
-                                </div>
-                            </details>
+                            <strong>🔍 Multi-Source Verification:</strong> Found data on {results.sources ? results.sources.length : 0} sites.
                         </div>
                     )}
                 </div>
                 <button onClick={onClose} className="close-button">×</button>
             </div>
-            <ul className="ingredients-list" ref={listRef}>
-                {results.ingredients && results.ingredients.length > 0 ? (
-                    results.ingredients.map((item, index) => {
-                        if (!item || typeof item !== 'object') return null; // Defensive check
-                        return <ExpandableIngredient key={index} item={item} />;
-                    })
+            <ul className="ingredients-list" ref={listRef} style={{ padding: '0 10px' }}>
+                {results.sources && results.sources.length > 0 ? (
+                    results.sources.map((source, index) => (
+                        <li key={index} className="source-item" style={{
+                            marginBottom: '10px',
+                            background: 'rgba(255,255,255,0.05)',
+                            borderRadius: '8px',
+                            overflow: 'hidden'
+                        }}>
+                            <details style={{ width: '100%' }}>
+                                <summary style={{
+                                    padding: '12px',
+                                    cursor: 'pointer',
+                                    fontWeight: 'bold',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    listStyle: 'none'
+                                }}>
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        🌐 {source.name}
+                                    </span>
+                                    <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>▼</span>
+                                </summary>
+                                <div style={{
+                                    padding: '0 12px 12px 12px',
+                                    fontSize: '0.9rem',
+                                    opacity: 0.9,
+                                    borderTop: '1px solid rgba(255,255,255,0.1)',
+                                    marginTop: '5px'
+                                }}>
+                                    <p style={{ margin: '8px 0', fontSize: '0.75rem', opacity: 0.5 }}>Listed Ingredients:</p>
+                                    <div style={{ lineHeight: '1.6' }}>
+                                        {source.ingredients && source.ingredients.join(', ')}
+                                    </div>
+                                </div>
+                            </details>
+                        </li>
+                    ))
                 ) : (
                     <li className="ingredient-item" style={{ flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '30px', opacity: 0.6 }}>
                         <span style={{ fontSize: '2rem', marginBottom: '10px' }}>🕵️‍♀️</span>
-                        <span>Ingredients text not found.</span>
-                        <span style={{ fontSize: '0.8rem', marginTop: '5px' }}>Check the "Full Details" link above.</span>
+                        <span>No sources found.</span>
                     </li>
                 )}
             </ul>
@@ -196,53 +222,6 @@ export function ResultsCard({ results, onClose }) {
             >
                 Scan New Item
             </button>
-        </div >
-    );
-}
-
-function ExpandableIngredient({ item }) {
-    const [expanded, setExpanded] = React.useState(false);
-    const hasDescription = !!item.description;
-
-    return (
-        <li className="ingredient-item" onClick={() => hasDescription && setExpanded(!expanded)} style={{ flexDirection: 'column', cursor: hasDescription ? 'pointer' : 'default' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span className="ingredient-name">{item.name}</span>
-                    {hasDescription && (
-                        <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>{expanded ? '▲' : '▼'}</span>
-                    )}
-                </div>
-                {item.consensus && (
-                    <span style={{
-                        fontSize: '0.65rem',
-                        padding: '2px 6px',
-                        borderRadius: '8px',
-                        marginRight: '8px',
-                        background: item.consensus === 'High' ? 'rgba(46, 204, 113, 0.2)' : item.consensus === 'Medium' ? 'rgba(241, 196, 15, 0.2)' : 'rgba(231, 76, 60, 0.2)',
-                        color: item.consensus === 'High' ? '#2ecc71' : item.consensus === 'Medium' ? '#f1c40f' : '#e74c3c',
-                        border: `1px solid ${item.consensus === 'High' ? '#2ecc71' : item.consensus === 'Medium' ? '#f1c40f' : '#e74c3c'}`
-                    }}>
-                        {item.commonality || item.consensus}
-                    </span>
-                )}
-                {item.warning && <span className="ingredient-warning">⚠️ {item.warning}</span>}
-            </div>
-            {
-                expanded && item.description && (
-                    <div style={{
-                        marginTop: '8px',
-                        fontSize: '0.9rem',
-                        color: 'rgba(255,255,255,0.7)',
-                        background: 'rgba(255,255,255,0.05)',
-                        padding: '8px',
-                        borderRadius: '8px',
-                        width: '100%'
-                    }}>
-                        {item.description}
-                    </div>
-                )
-            }
-        </li >
+        </div>
     );
 }
