@@ -51,16 +51,42 @@
     color: var(--text-secondary);
 }
 
+.input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
 .api-input {
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 10px;
     padding: 12px;
+    padding-right: 40px;
+    /* Space for toggle button */
     color: white;
     font-family: inherit;
     font-size: 1rem;
     width: 100%;
     outline: none;
+}
+
+.toggle-visibility {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    opacity: 0.7;
+    padding: 0;
+    width: auto;
+    height: auto;
+}
+
+.toggle-visibility:hover {
+    opacity: 1;
 }
 
 .api-input:focus {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './SettingsModal.css';
 
 export function SettingsModal({ isOpen, onClose, onSave }) {
-    const [apiKey, setApiKey] = useState('');
+    const [showKey, setShowKey] = useState(false);
 
     useEffect(() => {
         const savedKey = localStorage.getItem('gemini_api_key');
@@ -27,13 +27,22 @@ export function SettingsModal({ isOpen, onClose, onSave }) {
                 </p>
                 <p className="settings-note">Your key is stored locally on this device.</p>
 
-                <input
-                    type="password"
-                    placeholder="Paste API Key here..."
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    className="api-input"
-                />
+                <div className="input-wrapper">
+                    <input
+                        type={showKey ? "text" : "password"}
+                        placeholder="Paste API Key here..."
+                        value={apiKey}
+                        onChange={(e) => setApiKey(e.target.value)}
+                        className="api-input"
+                    />
+                    <button
+                        className="toggle-visibility"
+                        onClick={() => setShowKey(!showKey)}
+                        title={showKey ? "Hide API Key" : "Show API Key"}
+                    >
+                        {showKey ? "🙈" : "👁️"}
+                    </button>
+                </div>
 
                 <div className="settings-actions">
                     <button onClick={onClose} className="btn-cancel">Cancel</button>
