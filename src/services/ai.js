@@ -5,6 +5,69 @@ Analyze this image. If it contains food or a product with ingredients, list the 
 Format your response as a simple JSON object with a key "ingredients".
 Each ingredient should have a "name" and optional "warning" (if it's a common allergen or unhealthy additive).
 Example:
+{
+  "ingredients": [
+    { "name": "Water" },
+    { "name": "Sugar", "warning": "High Sugar" },
+    { "name": "Peanuts", "warning": "Allergen" }
+  ]
+}
+If the image is NOT food or a product, return:
+{ "ingredients": [], "error": "No food/product detected" }
+Do not surround with markdown backticks. Just return raw JSON.
+`;
+
+export async function analyzeImage(imageSource, apiKey) {
+    if (!apiKey) {
+        throw new Error("API Key missing");
+    }
+
+    let base64Image = "";
+
+    // Handle Video Element
+    if (imageSource.tagName === 'VIDEO') {
+        const canvas = document.createElement("canvas");
+        canvas.width = imageSource.videoWidth;
+        canvas.height = imageSource.videoHeight;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(imageSource, 0, 0, canvas.width, canvas.height);
+        base64Image = canvas.toDataURL("image/jpeg").split(',')[1];
+    }
+    // Handle File Object (Upload)
+    else if (imageSource instanceof File) {
+        base64Image = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result.split(',')[1]);
+            reader.onerror = reject;
+            reader.readAsDataURL(imageSource);
+        });
+    }
+    else {
+        throw new Error("Invalid image source");
+    }
+
+    // 3. Define models to try (Fallback strategy)
+    // Updated Dec 2025: Prioritize 2.x models as 1.x may be retired
+    const modelsToTry = [
+        "gemini-2.5-flash",
+        "gemini-2.0-flash",
+        "gemini-1.5-flash",
+        "gemini-1.5-pro"
+    ];
+    const genAI = new GoogleGenerativeAI(apiKey);
+
+    let lastError = null;
+
+    for (const modelName of modelsToTry) {
+        try {
+            console.log(`Attempting analysis with model: ${modelName}`);
+            const model = genAI.getGenerativeModel({ model: modelName });
+
+            const result = await model.generateContent([
+                PROMPT,
+                {
+                    inlineData: {
+                        data: base64Image,
                         mimeType: "image/jpeg",
                     },
                 },
@@ -14,19 +77,19 @@ Example:
             console.log("Raw AI Response:", responseText);
 
             // Clean up markdown if present
-            const cleanJson = responseText.replace(/```json / g, '').replace(/```/g, '').trim();
-return JSON.parse(cleanJson);
+            const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+            return JSON.parse(cleanJson);
 
         } catch (error) {
-    console.warn(`Model ${ modelName } failed: `, error);
-    lastError = error;
-    // Continue to next model
-}
+            console.warn(`Model ${modelName} failed:`, error);
+            lastError = error;
+            // Continue to next model
+        }
     }
 
-// If we get here, all models failed
-console.error("All AI models failed.");
-throw new Error(`AI Analysis Failed.Verify API Key settings. (Error: ${ lastError?.message })`);
+    // If we get here, all models failed
+    console.error("All AI models failed.");
+    throw new Error(`AI Analysis Failed. Verified API Key? (Error: ${lastError?.message})`);
 }
 
 // Diagnostic Tool
@@ -37,28 +100,28 @@ export async function testConnection(apiKey) {
         // Try REST API directly to list models (avoids SDK weirdness)
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
 
-if (!response.ok) {
-    const err = await response.json();
-    return {
-        success: false,
-        message: `Google API Error (${response.status}): ${err.error?.message || response.statusText}`
-    };
-}
+        if (!response.ok) {
+            const err = await response.json();
+            return {
+                success: false,
+                message: `Google API Error (${response.status}): ${err.error?.message || response.statusText}`
+            };
+        }
 
-const data = await response.json();
-if (data && data.models) {
-    // Filter for generateContent supported models
-    const available = data.models
-        .filter(m => m.supportedGenerationMethods.includes('generateContent'))
-        .map(m => m.name.replace('models/', ''))
-        .join(', ');
+        const data = await response.json();
+        if (data && data.models) {
+            // Filter for generateContent supported models
+            const available = data.models
+                .filter(m => m.supportedGenerationMethods.includes('generateContent'))
+                .map(m => m.name.replace('models/', ''))
+                .join(', ');
 
-    return { success: true, message: `Success! Available models: ${available}` };
-}
+            return { success: true, message: `Success! Available models: ${available}` };
+        }
 
-return { success: false, message: "Key valid, but NO models returned from ListModels." };
+        return { success: false, message: "Key valid, but NO models returned from ListModels." };
 
     } catch (error) {
-    return { success: false, message: `Network Error: ${error.message}` };
-}
+        return { success: false, message: `Network Error: ${error.message}` };
+    }
 }
