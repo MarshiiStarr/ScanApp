@@ -7,7 +7,10 @@ export function ResultsCard({ results, onClose }) {
     return (
         <div className="results-card">
             <div className="results-header">
-                <h2>Ingredients Found</h2>
+                <div>
+                    <h2 style={{ fontSize: '0.9rem', opacity: 0.7, textTransform: 'uppercase', letterSpacing: '1px' }}>Detected</h2>
+                    <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '2px 0 0 0' }}>{results.productName || "Ingredients Found"}</h1>
+                </div>
                 <button onClick={onClose} className="close-button">×</button>
             </div>
             <ul className="ingredients-list">
