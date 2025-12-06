@@ -34,7 +34,7 @@ export async function analyzeImage(videoElement, apiKey) {
 
     // 3. Call Gemini API
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-001" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
     try {
         const result = await model.generateContent([
