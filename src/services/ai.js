@@ -12,12 +12,13 @@ Analyze the image to identify the product.
 - **IF NOT FOUND**: If the product is not currently sold on Sephora, return "sources": [].
 
 **CATEGORY 2: FOOD / BEVERAGE**
-- **MANDATORY SOURCE**: You must search **EXCLUSIVELY on New Zealand Supermarkets** (Woolworths NZ, New World, Pak'nSave).
-- **FORBIDDEN SOURCES**: Do NOT check Walmart, Target, or US sites.
+- **MANDATORY SOURCE**: You must search **EXCLUSIVELY on New Zealand Supermarket websites** (e.g., `countdown.co.nz`, `newworld.co.nz`, `paknsave.co.nz`).
+- **FORBIDDEN SOURCES**: **DO NOT** use data from Walmart, Tesco, Amazon Fresh, or general "US/UK" versions of the product.
+- **GEOLOCATION LOCK**: If the product is sold globally (e.g. "Coke"), you must find the **NZ-specific formulation** listed on a NZ retailer site. If you cannot confirm the NZ version, return EMPTY.
 
 **DATA EXTRACTION (ZERO TOLERANCE)**
-- **OCULAR VERIFICATION**: Only list ingredients you can "see" on the simulated page.
-- **NO HALLUCINATIONS**: If the list is missing, hidden, or the product is out of stock, return EMPTY. Do not guess.
+- **OCULAR VERIFICATION**: Only list ingredients you can "see" on the simulated page of the specific allowed domain.
+- **NO HALLUCINATIONS**: If the list is missing, hidden, or the product is out of stock on the NZ site, return EMPTY. Do not guess based on the US label.
 
 **Output Format (JSON):**
 {
