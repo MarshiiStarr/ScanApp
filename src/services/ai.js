@@ -1,21 +1,16 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const PROMPT = `
-Analyze this image. If it contains food or a product with ingredients, list the main ingredients.
+Analyze this image. If it contains **Food** OR **Cosmetics/Makeup** products, list the main ingredients.
 Format your response as a simple JSON object with keys "productName" and "ingredients".
 - "productName": A short name of the product.
 - "ingredients": Array of objects with "name" and optional "warning".
-- IMPORTANT: ONLY add a "warning" property if the ingredient contains DAIRY, EGG, or CINNAMON. Do NOT flag anything else (like Sugar/Peanuts).
-- Example: { "name": "Milk", "warning": "Dairy" }, { "name": "Sugar" }
-Example:
-{
-  "productName": "Example Soda",
-  "ingredients": [
-    { "name": "Carbonated Water" },
-    { "name": "Sugar", "warning": "High Sugar" },
-    { "name": "Caramel Color", "warning": "Additive" }
-  ]
-}
+- IMPORTANT: ONLY add a "warning" property if the ingredient matches these categories:
+  1. DAIRY
+  2. EGG
+  3. CINNAMON (include derivatives like Cinnamal, Cinnamyl Alcohol, Cinnamates, Benzyl Cinnamate).
+- Do NOT flag anything else (like Sugar/Peanuts/Parabens).
+- Example: { "name": "Amyl Cinnamal", "warning": "Cinnamon Derivative" }, { "name": "Water" }
 If the image is NOT food or a product, return:
 { "productName": "Unknown", "ingredients": [], "error": "No food/product detected" }
 Do not surround with markdown backticks. Just return raw JSON.
