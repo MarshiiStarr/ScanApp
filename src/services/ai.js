@@ -3,8 +3,10 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const PROMPT = `
 Analyze this image. If it contains food or a product with ingredients, list the main ingredients.
 Format your response as a simple JSON object with keys "productName" and "ingredients".
-- "productName": A short name of the product (e.g. "Coca Cola", "Apple", "Unknown Product").
+- "productName": A short name of the product.
 - "ingredients": Array of objects with "name" and optional "warning".
+- IMPORTANT: ONLY add a "warning" property if the ingredient contains DAIRY, EGG, or CINNAMON. Do NOT flag anything else (like Sugar/Peanuts).
+- Example: { "name": "Milk", "warning": "Dairy" }, { "name": "Sugar" }
 Example:
 {
   "productName": "Example Soda",

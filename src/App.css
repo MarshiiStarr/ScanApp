@@ -7,7 +7,7 @@
 
 .controls {
   position: absolute;
-  bottom: 40px;
+  bottom: 0;
   left: 0;
   width: 100%;
   z-index: 10;
@@ -15,6 +15,10 @@
   flex-direction: column;
   align-items: center;
   transition: opacity 0.3s ease;
+  padding-bottom: 50px;
+  /* Move up from bottom edge */
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  /* Soft fade */
 }
 
 .controls.hidden {
@@ -26,8 +30,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 30px;
-  margin-bottom: 15px;
+  gap: 60px;
+  /* More space between buttons */
+  margin-bottom: 20px;
   width: 100%;
 }
 
@@ -99,10 +104,13 @@
 
 .top-bar {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 40px;
+  /* Move down from top edge */
+  right: 30px;
+  /* Move in from right edge */
   display: flex;
-  gap: 15px;
+  gap: 20px;
+  /* More gap */
   z-index: 20;
 }
 
