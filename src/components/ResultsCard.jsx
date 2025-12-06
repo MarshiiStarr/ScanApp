@@ -149,6 +149,11 @@ export function ResultsCard({ results, onClose }) {
                             textAlign: 'left'
                         }}>
                             ⚠️ <strong>Estimation:</strong> Exact ingredients for this variant may differ. Always verify with the physical bottle.
+                            {results.reasoning && (
+                                <div style={{ marginTop: '5px', fontWeight: 'normal', fontStyle: 'italic', opacity: 0.9 }}>
+                                    "{results.reasoning}"
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>

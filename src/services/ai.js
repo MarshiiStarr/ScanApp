@@ -1,32 +1,15 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const PROMPT = `
-Analyze this image. If it contains **Food** OR **Cosmetics/Makeup** products, list the main ingredients.
-Format your response as a simple JSON object with keys "productName", "category", "ingredients", "isVegan", "analysisMethod", and "knowledgeSources".
-- "productName": A short name of the product.
-- "category": String. Must be either "Food" or "Cosmetic".
-- "analysisMethod": String. Either "OCR" (if you read the ingredients directly from the image text) OR "KnowledgeBase" (if you recognized the product and inferred ingredients from your training data).
-- "knowledgeSources": Array of strings. IF analysisMethod is "KnowledgeBase", list sources ONLY if you are certain.
-  - **CRITICAL**: Do NOT invent sources. If a specific product variant (e.g. "Cheirosa 48") is likely not in public databases, state "General Brand Formulation" or "Similar Products".
-  - DO NOT list "INCIDecoder" or "Sephora" unless you are sure the product is listed there.
-- "isVegan": Boolean (true/false). True ONLY if the product appears free of all animal-derived ingredients (meat, dairy, eggs, honey, beeswax, lanolin, carmine, etc).
-- "ingredients": Array of objects with "name", optional "warning", and optional "description".
-- IMPORTANT: Check for these allergens in ALL products (Food & Cosmetics):
-  1. DAIRY (Milk, Casein, Whey, Lactose, Cream, Butter, Cheese, Lactoferrin, etc.)
-  2. EGG (Egg, Albumin, Globulin, Ovum, Lysozyme, Ovalbumin, etc.)
-  3. CINNAMON & CINNAMATES (Cinnamal, Cinnamyl Alcohol, Benzyl Cinnamate, Octinoxate, Octocrylene, Cinoxate, Octyl Methoxycinnamate).
-  4. SALICYLATES (Salicylic Acid, Benzyl Salicylate, Homosalate, Octyl Salicylate, Trolamine Salicylate, Phenyl Salicylate, Amyl Salicylate).
-- **SOURCE PRIORITY**: For skin allergens (Salicylates/Cinnamates), apply guidelines from **DermNetNZ.org** and **PubChem**.
-- **ACCURACY RULE**: In "KnowledgeBase" mode, do NOT list specific chemical allergens (like Benzyl Salicylate) unless you are certain they are in this specific variant.
-- **Connection**: If you flag a specific allergen (like Benzyl Salicylate) that is often hidden inside "Fragrance", explicitly say so in the warning (e.g. "Warning: Likely present inside Fragrance/Parfum").
-- **DEEP DIVE**: If an ingredient is vague (e.g. "Fragrance", "Parfum", "Flavor", "Spices"), add a "description" field explaining what it likely hides.
+4. SALICYLATES(Salicylic Acid, Benzyl Salicylate, Homosalate, Octyl Salicylate, Trolamine Salicylate, Phenyl Salicylate, Amyl Salicylate).
+- ** SOURCE PRIORITY **: For skin allergens(Salicylates / Cinnamates), apply guidelines from ** DermNetNZ.org ** and ** PubChem **.
+- ** ACCURACY RULE **: In "KnowledgeBase" mode, do NOT list specific chemical allergens(like Benzyl Salicylate) unless you are certain they are in this specific variant.
+- ** Connection **: If you flag a specific allergen(like Benzyl Salicylate) that is often hidden inside "Fragrance", explicitly say so in the warning(e.g. "Warning: Likely present inside Fragrance/Parfum").
+- ** DEEP DIVE **: If an ingredient is vague(e.g. "Fragrance", "Parfum", "Flavor", "Spices"), add a "description" field explaining what it likely hides.
   - Example: { "name": "Fragrance", "warning": "Potential Risk", "description": "Fragrance mixes often contain hidden allergens like Cinnamal or Limonene." }
-- Do NOT flag anything else (like Sugar/Peanuts/Parabens).
-- FALLBACK: If the ingredient text is unreadable or hidden, but you recognize the product (e.g. "Head & Shoulders"), list the **standard known ingredients** for that product from your knowledge base.
+- Do NOT flag anything else (like Sugar / Peanuts / Parabens).
+- FALLBACK: If the ingredient text is unreadable or hidden, but you recognize the product(e.g. "Head & Shoulders"), list the ** standard known ingredients ** for that product from your knowledge base.
 - Example: { "name": "Amyl Cinnamal", "warning": "Cinnamon Derivative" }, { "name": "Water" }
 If the image is NOT food or a product, return:
 { "productName": "Unknown", "ingredients": [], "error": "No food/product detected" }
-Do not surround with markdown backticks. Just return raw JSON.
+Do not surround with markdown backticks.Just return raw JSON.
 `;
 
 export async function analyzeImage(imageSource, apiKey) {
@@ -76,7 +59,7 @@ export async function analyzeImage(imageSource, apiKey) {
 
     for (const modelName of modelsToTry) {
         try {
-            console.log(`Attempting analysis with model: ${modelName}`);
+            console.log(`Attempting analysis with model: ${ modelName } `);
             const model = genAI.getGenerativeModel({ model: modelName });
 
             const result = await model.generateContent([
@@ -93,34 +76,34 @@ export async function analyzeImage(imageSource, apiKey) {
             console.log("Raw AI Response:", responseText);
 
             // Clean up markdown if present
-            const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-            const rawData = JSON.parse(cleanJson);
+            const cleanJson = responseText.replace(/```json / g, '').replace(/```/g, '').trim();
+const rawData = JSON.parse(cleanJson);
 
-            // SANITIZE DATA (Prevent App Crashes)
-            // Ensure knowledgeSources is an array
-            if (rawData.knowledgeSources && !Array.isArray(rawData.knowledgeSources)) {
-                // If it's a string, wrap it. If it's something else, empty array.
-                rawData.knowledgeSources = typeof rawData.knowledgeSources === 'string'
-                    ? [rawData.knowledgeSources]
-                    : [];
-            }
-            // Ensure ingredients is an array
-            if (!Array.isArray(rawData.ingredients)) {
-                rawData.ingredients = [];
-            }
+// SANITIZE DATA (Prevent App Crashes)
+// Ensure knowledgeSources is an array
+if (rawData.knowledgeSources && !Array.isArray(rawData.knowledgeSources)) {
+    // If it's a string, wrap it. If it's something else, empty array.
+    rawData.knowledgeSources = typeof rawData.knowledgeSources === 'string'
+        ? [rawData.knowledgeSources]
+        : [];
+}
+// Ensure ingredients is an array
+if (!Array.isArray(rawData.ingredients)) {
+    rawData.ingredients = [];
+}
 
-            return rawData;
+return rawData;
 
         } catch (error) {
-            console.warn(`Model ${modelName} failed:`, error);
-            lastError = error;
-            // Continue to next model
-        }
+    console.warn(`Model ${modelName} failed:`, error);
+    lastError = error;
+    // Continue to next model
+}
     }
 
-    // If we get here, all models failed
-    console.error("All AI models failed.");
-    throw new Error(`AI Analysis Failed. Verified API Key? (Error: ${lastError?.message})`);
+// If we get here, all models failed
+console.error("All AI models failed.");
+throw new Error(`AI Analysis Failed. Verified API Key? (Error: ${lastError?.message})`);
 }
 
 // Diagnostic Tool
