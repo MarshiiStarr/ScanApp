@@ -148,12 +148,20 @@ export function ResultsCard({ results, onClose }) {
                             color: '#ffcc00',
                             textAlign: 'left'
                         }}>
-                            ⚠️ <strong>Estimation:</strong> Exact ingredients for this variant may differ. Always verify with the physical bottle.
-                            {results.reasoning && (
-                                <div style={{ marginTop: '5px', fontWeight: 'normal', fontStyle: 'italic', opacity: 0.9 }}>
-                                    "{results.reasoning}"
+                            <details style={{ marginTop: '5px' }}>
+                                <summary style={{ cursor: 'pointer', fontWeight: 'bold' }}>
+                                    ⚠️ Estimation Warning (Tap for info)
+                                </summary>
+                                <div style={{ marginTop: '8px', fontWeight: 'normal' }}>
+                                    Exact ingredients for this variant may differ. Always verify with the physical bottle.
+                                    {results.reasoning && (
+                                        <div style={{ marginTop: '8px', fontStyle: 'italic', borderTop: '1px solid rgba(0,0,0,0.1)', paddingTop: '4px' }}>
+                                            <strong>Why?</strong><br />
+                                            "{results.reasoning}"
+                                        </div>
+                                    )}
                                 </div>
-                            )}
+                            </details>
                         </div>
                     )}
                 </div>
