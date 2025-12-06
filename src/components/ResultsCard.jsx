@@ -107,27 +107,7 @@ export function ResultsCard({ results, onClose }) {
                             <span>{results.analysisMethod === 'OCR' ? '📷 Scanned from Label' : '🧠 AI Database (Inferred)'}</span>
                         </div>
 
-                        {results.productName && (
-                            <a
-                                href={
-                                    results.category === 'Cosmetic'
-                                        ? `https://www.google.com/search?q=${encodeURIComponent(results.productName + " ingredients (site:ewg.org OR site:paulaschoice.com OR site:incipedia.personalcarecouncil.org OR site:cosmeticsinfo.org OR site:sephora.com OR site:ulta.com OR site:amazon.com OR site:target.com OR site:walmart.com OR site:walgreens.com OR site:boots.com OR site:skicrisma.com OR site:incidecoder.com OR site:skinsafeproducts.com)")}`
-                                        : `https://www.google.com/search?q=${encodeURIComponent(results.productName + " ingredients site:openfoodfacts.org OR site:ewg.org OR site:amazon.com OR site:walmart.com")}`
-                                }
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{
-                                    color: 'var(--primary-accent)',
-                                    fontSize: '0.8rem',
-                                    textDecoration: 'none',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '5px'
-                                }}
-                            >
-                                <span>🔎 Verify Online</span>
-                            </a>
-                        )}
+
                     </div>
 
                     {results.knowledgeSources && results.knowledgeSources.length > 0 && (
