@@ -6,11 +6,43 @@ import { SettingsModal } from './components/SettingsModal';
 import { analyzeImage } from './services/ai';
 import './App.css';
 
+import { HistoryModal } from './components/HistoryModal';
+
 function App() {
   const [scanning, setScanning] = useState(false);
   const [results, setResults] = useState(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [history, setHistory] = useState([]);
   const videoRef = useRef(null);
+
+  // Load History on Mount
+  useEffect(() => {
+    const saved = localStorage.getItem('scan_history');
+    if (saved) {
+      try {
+        setHistory(JSON.parse(saved));
+      } catch (e) {
+        console.error("Failed to load history", e);
+      }
+    }
+  }, []);
+
+  // Save History Helper
+  const saveToHistory = (newResult) => {
+    // Add timestamp if missing
+    const item = { ...newResult, timestamp: Date.now() };
+    const updated = [item, ...history].slice(0, 50); // Keep last 50
+    setHistory(updated);
+    localStorage.setItem('scan_history', JSON.stringify(updated));
+  };
+
+  const clearHistory = () => {
+    if (confirm("Clear all history?")) {
+      setHistory([]);
+      localStorage.removeItem('scan_history');
+    }
+  };
 
   // Check for API Key on mount
   useEffect(() => {
@@ -44,6 +76,7 @@ function App() {
         setResults({ ingredients: [{ name: "Error: " + data.error, warning: "Try again" }] });
       } else {
         setResults(data);
+        saveToHistory(data); // Save successful scan
       }
     } catch (err) {
       console.error(err);
@@ -63,7 +96,10 @@ function App() {
 
       <ScannerOverlay scanning={scanning} />
 
-      <button className="settings-btn" onClick={() => setIsSettingsOpen(true)}>⚙️</button>
+      <div className="top-baR">
+        <button className="icon-btn history-btn-top" onClick={() => setIsHistoryOpen(true)}>🕒</button>
+        <button className="icon-btn settings-btn-top" onClick={() => setIsSettingsOpen(true)}>⚙️</button>
+      </div>
 
       <div className={`controls ${results ? 'hidden' : ''}`}>
         <div className="controls-row">
@@ -103,6 +139,14 @@ function App() {
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         onSave={() => console.log("Key Saved")}
+      />
+
+      <HistoryModal
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        history={history}
+        onSelectResult={(item) => setResults(item)}
+        onClearHistory={clearHistory}
       />
     </div>
   );
