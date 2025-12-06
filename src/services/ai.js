@@ -25,9 +25,11 @@ Format your response as a JSON object:
   "isVegan": Boolean
 }
 
-- **No Warnings**: Do NOT add allergen warnings or "common fragrance allergen" notes. Just list the raw ingredients.
-- **Strictness**: If the product is not found on a specific site, do not include that site in the list.
-- **Variety**: Try to include at least 3-5 different sources if available to show the user any discrepancies.
+- **ZERO TOLERANCE FOR HALLUCINATIONS**:
+    - **DO NOT GUESS**. Do NOT list ingredients because they are "usually" in this product.
+    - **DO NOT INFER**. Do NOT use your general knowledge of the product formula.
+    - **SIMULATED OCR ONLY**: You must act as if you are reading the text on the specific website page.
+    - **IF NOT FOUND, RETURN EMPTY**: If you cannot confirm the specific text list for a source, return an empty ingredients array `[]` for that source. One accurate source is better than 5 guessed ones.
 
 Do not surround with markdown backticks. Just return raw JSON.
 `;
