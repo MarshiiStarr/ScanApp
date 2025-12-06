@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './SettingsModal.css';
 
 export function SettingsModal({ isOpen, onClose, onSave }) {
+    const [apiKey, setApiKey] = useState('');
     const [showKey, setShowKey] = useState(false);
 
     useEffect(() => {
