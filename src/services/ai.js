@@ -7,14 +7,15 @@ Format your response as a simple JSON object with keys "productName" and "ingred
 - "ingredients": Array of objects with "name" and optional "warning".
 Example:
 {
+  "productName": "Example Soda",
   "ingredients": [
-    { "name": "Water" },
+    { "name": "Carbonated Water" },
     { "name": "Sugar", "warning": "High Sugar" },
-    { "name": "Peanuts", "warning": "Allergen" }
+    { "name": "Caramel Color", "warning": "Additive" }
   ]
 }
 If the image is NOT food or a product, return:
-{ "ingredients": [], "error": "No food/product detected" }
+{ "productName": "Unknown", "ingredients": [], "error": "No food/product detected" }
 Do not surround with markdown backticks. Just return raw JSON.
 `;
 
@@ -43,12 +44,16 @@ export async function analyzeImage(imageSource, apiKey) {
             reader.readAsDataURL(imageSource);
         });
     }
+    // Handle Base64 String (Direct)
+    else if (typeof imageSource === 'string') {
+        // Allow passing raw base64 or data uri
+        base64Image = imageSource.includes(',') ? imageSource.split(',')[1] : imageSource;
+    }
     else {
         throw new Error("Invalid image source");
     }
 
     // 3. Define models to try (Fallback strategy)
-    // Updated Dec 2025: Prioritize 2.x models as 1.x may be retired
     const modelsToTry = [
         "gemini-2.5-flash",
         "gemini-2.0-flash",

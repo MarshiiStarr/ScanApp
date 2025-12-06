@@ -14,6 +14,7 @@ function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [history, setHistory] = useState([]);
+  const [frozenFrame, setFrozenFrame] = useState(null);
   const videoRef = useRef(null);
 
   // Load History on Mount
@@ -53,6 +54,16 @@ function App() {
     }
   }, []);
 
+  // Helper to capture frame
+  const captureVideoFrame = (video) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL("image/jpeg");
+  };
+
   const handleScan = async (file = null) => {
     if (scanning) return;
 
@@ -64,15 +75,29 @@ function App() {
 
     setScanning(true);
     setResults(null);
+    setFrozenFrame(null); // Reset previous frame
 
     try {
-      const source = file || videoRef.current;
-      if (!source) throw new Error("No image source");
+      let source;
 
+      if (file) {
+        // If file upload, create object URL for preview
+        source = file;
+        const objectUrl = URL.createObjectURL(file);
+        setFrozenFrame(objectUrl);
+      } else if (videoRef.current) {
+        // If camera, capture frame immediately
+        const frameData = captureVideoFrame(videoRef.current);
+        setFrozenFrame(frameData);
+        source = frameData; // Pass base64 to AI
+      } else {
+        throw new Error("No image source");
+      }
+
+      // Analyze the source (File or Base64 String)
       const data = await analyzeImage(source, apiKey);
 
       if (data.error) {
-        // Handle case where AI didn't see food
         setResults({ ingredients: [{ name: "Error: " + data.error, warning: "Try again" }] });
       } else {
         setResults(data);
@@ -83,16 +108,31 @@ function App() {
       setResults({ ingredients: [{ name: "Analysis Failed", warning: err.message }] });
     } finally {
       setScanning(false);
+      // We don't clear frozenFrame here so it stays behind results until closed
     }
   };
 
   const handleCloseResults = () => {
     setResults(null);
+    setFrozenFrame(null); // Clear freeze frame when returning to camera
   };
 
   return (
     <div className="app-container">
       <CameraView onRef={(ref) => (videoRef.current = ref.current)} />
+
+      {/* Freeze Frame Overlay: Displays captured image over camera during scan/results */}
+      {frozenFrame && (
+        <div
+          className="freeze-frame"
+          style={{
+            position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+            backgroundImage: `url(${frozenFrame})`,
+            backgroundSize: 'cover', backgroundPosition: 'center',
+            zIndex: 5
+          }}
+        />
+      )}
 
       <ScannerOverlay scanning={scanning} />
 
