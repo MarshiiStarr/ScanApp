@@ -2,10 +2,69 @@ import React from 'react';
 import './ResultsCard.css';
 
 export function ResultsCard({ results, onClose }) {
+    // Touch Drag Logic
+    const [dragY, setDragY] = React.useState(0);
+    const [isDragging, setIsDragging] = React.useState(false);
+    const startY = React.useRef(0);
+    const currentY = React.useRef(0);
+    const cardRef = React.useRef(null);
+
     if (!results) return null;
 
+    const handleTouchStart = (e) => {
+        // Only allow drag if we are at the top of the scroll
+        if (cardRef.current && cardRef.current.scrollTop === 0) {
+            startY.current = e.touches[0].clientY;
+            setIsDragging(true);
+        }
+    };
+
+    const handleTouchMove = (e) => {
+        if (!isDragging) return;
+        const y = e.touches[0].clientY;
+        const diff = y - startY.current;
+
+        // Only allow dragging DOWN (positive diff)
+        if (diff > 0) {
+            // Prevent default scroll if we are acting as a drag
+            // Note: This requires passive: false listener often, but simple logic here helps
+            currentY.current = diff;
+            setDragY(diff);
+        }
+    };
+
+    const handleTouchEnd = () => {
+        setIsDragging(false);
+        if (currentY.current > 120) {
+            // Threshold met - Close
+            onClose();
+        } else {
+            // Reset
+            setDragY(0);
+            currentY.current = 0;
+        }
+    };
+
     return (
-        <div className="results-card">
+        <div
+            className="results-card"
+            ref={cardRef}
+            style={{
+                transform: `translateY(${dragY}px)`,
+                transition: isDragging ? 'none' : 'transform 0.3s ease-out'
+            }}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+        >
+            <div className="drag-handle-pill" style={{
+                width: '40px',
+                height: '4px',
+                background: 'rgba(255,255,255,0.3)',
+                borderRadius: '4px',
+                margin: '8px auto 15px auto'
+            }}></div>
+
             <div className="results-header">
                 <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
