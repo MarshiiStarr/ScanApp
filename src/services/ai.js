@@ -2,30 +2,37 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const PROMPT = `
 Analyze this image. If it contains **Food** OR **Cosmetics/Makeup** products, list the main ingredients.
-Format your response as a simple JSON object with keys "productName", "category", "ingredients", "isVegan", "analysisMethod", "reasoning", and "knowledgeSources".
-- "productName": A short name of the product.
-- "category": String. Must be either "Food" or "Cosmetic".
-- "analysisMethod": String. Either "OCR" (if you read the ingredients directly from the image text) OR "KnowledgeBase" (if you recognized the product and inferred ingredients from your training data).
-- "reasoning": String. SHORT (max 1 sentence) explanation of WHY you are estimating. (e.g. "Text was blurry, so I recognized the 'Sol de Janeiro' bottle and used standard brand ingredients.")
-- "knowledgeSources": Array of strings. IF analysisMethod is "KnowledgeBase", list sources ONLY if you are certain.
-  - **CRITICAL**: Do NOT invent sources. If a specific product variant (e.g. "Cheirosa 48") is likely not in public databases, state "General Brand Formulation" or "Similar Products".
-  - DO NOT list "INCIDecoder" or "Sephora" unless you are sure the product is listed there.
-- "isVegan": Boolean (true/false). True ONLY if the product appears free of all animal-derived ingredients (meat, dairy, eggs, honey, beeswax, lanolin, carmine, etc).
-- "ingredients": Array of objects with "name", optional "warning", and optional "description".
-- IMPORTANT: Check for these allergens in ALL products (Food & Cosmetics):
-  1. DAIRY (Milk, Casein, Whey, Lactose, Cream, Butter, Cheese, Lactoferrin, etc.)
-  2. EGG (Egg, Albumin, Globulin, Ovum, Lysozyme, Ovalbumin, etc.)
-  3. CINNAMON & CINNAMATES (Cinnamal, Cinnamyl Alcohol, Benzyl Cinnamate, Octinoxate, Octocrylene, Cinoxate, Octyl Methoxycinnamate).
-  4. SALICYLATES (Salicylic Acid, Benzyl Salicylate, Homosalate, Octyl Salicylate, Trolamine Salicylate, Phenyl Salicylate, Amyl Salicylate).
-- **STRICT SOURCING**: You are restricted to knowledge explicitly found on **EWG.org**, **PaulasChoice.com**, **CosmeticsInfo.org**, and **Incipedia**.
-- **ANTI-HALLUCINATION**: Do **NOT** list ingredients based on "common formulations" or "standard brand ingredients" if you cannot verify the exact variant.
-- If you recognize the product but cannot recall the *exact* ingredient list from the allowed sources:
-  - Return `ingredients: []`.
-  - Set `reasoning` to: "Product recognized, but exact formula not found in verifiable sources (EWG/PaulasChoice)."
-  - Do NOT guess.
-- **Connection**: If you are certain an ingredient is present, flag allergens. If you flag a specific allergen (like Benzyl Salicylate) that is often hidden inside "Fragrance", explicitly say so in the warning (e.g. "Warning: Likely present inside Fragrance/Parfum").
-If the image is NOT food or a product, return:
-{ "productName": "Unknown", "ingredients": [], "error": "No food/product detected" }
+
+**MODE: CONSENSUS SEARCH**
+1. Identify the product name and variant.
+2. Simulate a search for this products ingredient list across the **Top 15 Popular Retail & Informational Websites** (e.g. Amazon, Sephora, UIta, Target, Walmart, Boots, Walgreens, EWG, INCIDecoder, Paulas Choice, official brand site, etc.).
+3. **Compare** the lists found on these different sites.
+4. **Sort** the ingredients by "Consensus":
+   - **High Consensus**: Ingredients appearing on almost ALL checked sites.
+   - **Medium Consensus**: Ingredients appearing on MANY sites.
+   - **Low Consensus**: Ingredients appearing on only FEW sites.
+
+Format your response as a JSON object:
+{
+  "productName": "String",
+  "category": "Food" or "Cosmetic",
+  "analysisMethod": "ConsensusSearch",
+  "sourcesChecked": ["List", "of", "sites", "you", "considered"],
+  "ingredients": [
+    {
+       "name": "Ingredient Name",
+       "consensus": "High" | "Medium" | "Low",
+       "commonality": "Found on ~90% of sites" (Estimations),
+       "warning": "Allergen Warning if applicable"
+    }
+  ],
+  "isVegan": Boolean
+}
+
+- **Isolate Allergens**: Check for DAIRY, EGG, CINNAMATES, SALICYLATES.
+- **Deep Dive**: If "Fragrance" is listed, add a "description" field noting it likely contains hidden allergens if permissible by the consensus data.
+- **Strictness**: If the product is NOT found on major sites, return an empty ingredient list and state "Product not widely available for consensus" in an error field.
+
 Do not surround with markdown backticks. Just return raw JSON.
 `;
 

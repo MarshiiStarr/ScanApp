@@ -137,31 +137,27 @@ export function ResultsCard({ results, onClose }) {
                         </div>
                     )}
 
-                    {results.analysisMethod === 'KnowledgeBase' && (
+                        </div>
+                    )}
+
+                    {results.analysisMethod === 'ConsensusSearch' && (
                         <div style={{
                             marginTop: '10px',
                             padding: '8px',
-                            background: 'rgba(255, 200, 0, 0.15)',
-                            border: '1px solid rgba(255, 200, 0, 0.3)',
+                            background: 'rgba(0, 200, 255, 0.1)',
+                            border: '1px solid rgba(0, 200, 255, 0.3)',
                             borderRadius: '6px',
                             fontSize: '0.8rem',
-                            color: '#ffcc00',
+                            color: '#00ccff',
                             textAlign: 'left'
                         }}>
-                            <details style={{ marginTop: '5px' }}>
-                                <summary style={{ cursor: 'pointer', fontWeight: 'bold' }}>
-                                    ⚠️ Estimation Warning (Tap for info)
-                                </summary>
-                                <div style={{ marginTop: '8px', fontWeight: 'normal' }}>
-                                    Exact ingredients for this variant may differ. Always verify with the physical bottle.
-                                    {results.reasoning && (
-                                        <div style={{ marginTop: '8px', fontStyle: 'italic', borderTop: '1px solid rgba(0,0,0,0.1)', paddingTop: '4px' }}>
-                                            <strong>Why?</strong><br />
-                                            "{results.reasoning}"
-                                        </div>
-                                    )}
+                             <strong>☁️ Consensus Search:</strong> Analyzed across {results.sourcesChecked ? results.sourcesChecked.length : 'multiple'} major sites.
+                             <details>
+                                <summary style={{cursor:'pointer', marginTop:'4px', opacity:0.8}}>View Sources</summary>
+                                <div style={{marginTop:'4px', fontSize:'0.75rem', opacity:0.75}}>
+                                    {results.sourcesChecked?.join(', ')}
                                 </div>
-                            </details>
+                             </details>
                         </div>
                     )}
                 </div>
@@ -201,7 +197,7 @@ export function ResultsCard({ results, onClose }) {
             >
                 Scan New Item
             </button>
-        </div>
+        </div >
     );
 }
 
@@ -218,21 +214,37 @@ function ExpandableIngredient({ item }) {
                         <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>{expanded ? '▲' : '▼'}</span>
                     )}
                 </div>
-                {item.warning && <span className="ingredient-warning">⚠️ {item.warning}</span>}
+                {item.consensus && (
+                    <span style={{
+                        fontSize: '0.65rem',
+                        padding: '2px 6px',
+                        borderRadius: '8px',
+                        marginRight: '8px',
+                        background: item.consensus === 'High' ? 'rgba(46, 204, 113, 0.2)' : item.consensus === 'Medium' ? 'rgba(241, 196, 15, 0.2)' : 'rgba(231, 76, 60, 0.2)',
+                        color: item.consensus === 'High' ? '#2ecc71' : item.consensus === 'Medium' ? '#f1c40f' : '#e74c3c',
+                        border: `1px solid ${item.consensus === 'High' ? '#2ecc71' : item.consensus === 'Medium' ? '#f1c40f' : '#e74c3c'}`
+                    }}>
+                        {item.commonality || item.consensus}
+                    </span>
+                )}
             </div>
-            {expanded && item.description && (
-                <div style={{
-                    marginTop: '8px',
-                    fontSize: '0.9rem',
-                    color: 'rgba(255,255,255,0.7)',
-                    background: 'rgba(255,255,255,0.05)',
-                    padding: '8px',
-                    borderRadius: '8px',
-                    width: '100%'
-                }}>
-                    {item.description}
-                </div>
-            )}
-        </li>
+            {item.warning && <span className="ingredient-warning">⚠️ {item.warning}</span>}
+        </div>
+            {
+        expanded && item.description && (
+            <div style={{
+                marginTop: '8px',
+                fontSize: '0.9rem',
+                color: 'rgba(255,255,255,0.7)',
+                background: 'rgba(255,255,255,0.05)',
+                padding: '8px',
+                borderRadius: '8px',
+                width: '100%'
+            }}>
+                {item.description}
+            </div>
+        )
+    }
+        </li >
     );
 }
