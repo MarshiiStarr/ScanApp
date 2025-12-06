@@ -63,6 +63,13 @@ export function ResultsCard({ results, onClose }) {
                             </a>
                         )}
                     </div>
+
+                    {results.knowledgeSources && results.knowledgeSources.length > 0 && (
+                        <div style={{ marginTop: '8px', fontSize: '0.75rem', opacity: 0.6 }}>
+                            <span style={{ fontWeight: 'bold' }}>📚 Data attributed to: </span>
+                            {results.knowledgeSources.join(', ')}
+                        </div>
+                    )}
                 </div>
                 <button onClick={onClose} className="close-button">×</button>
             </div>
