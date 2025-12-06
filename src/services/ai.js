@@ -30,6 +30,7 @@ Format your response as a JSON object:
     - **DO NOT INFER**. Do NOT use your general knowledge of the product formula.
     - **SIMULATED OCR ONLY**: You must act as if you are reading the text on the specific website page.
     - **IF NOT FOUND, RETURN EMPTY**: If you cannot confirm the specific text list for a source, return an empty ingredients array [] for that source. One accurate source is better than 5 guessed ones.
+    - **AVAILABILITY CHECK**: Prioritize sources where the product is likely **Currently Sold/Active**. Avoid listing sources if the product is known to be Discontinued or "Out of Stock" on that site.
 
 Do not surround with markdown backticks. Just return raw JSON.
 `;
