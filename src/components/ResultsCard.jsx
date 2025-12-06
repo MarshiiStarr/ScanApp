@@ -8,10 +8,9 @@ export function ResultsCard({ results, onClose }) {
     const startY = React.useRef(0);
     const currentY = React.useRef(0);
     const cardRef = React.useRef(null);
+    const listRef = React.useRef(null);
 
     if (!results) return null;
-
-    const listRef = React.useRef(null);
 
     const handleTouchStart = (e) => {
         // Find the scrollable list element
