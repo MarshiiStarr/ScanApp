@@ -5,10 +5,10 @@ Analyze this image. If it contains **Food** OR **Cosmetics/Makeup** products, li
 Format your response as a simple JSON object with keys "productName" and "ingredients".
 - "productName": A short name of the product.
 - "ingredients": Array of objects with "name" and optional "warning".
-- IMPORTANT: ONLY add a "warning" property if the ingredient matches these categories:
-  1. DAIRY
-  2. EGG
-  3. CINNAMON (include derivatives like Cinnamal, Cinnamyl Alcohol, Cinnamates, Benzyl Cinnamate).
+- IMPORTANT: Check for these allergens in ALL products (Food & Cosmetics):
+  1. DAIRY (Milk, Casein, Whey, Lactose, Cream, Butter, Cheese, Lactoferrin, etc.)
+  2. EGG (Egg, Albumin, Globulin, Ovum, Lysozyme, Ovalbumin, etc.)
+  3. CINNAMON (Cinnamon, Cinnamal, Cinnamyl Alcohol, Cinnamates, Benzyl Cinnamate, etc.)
 - Do NOT flag anything else (like Sugar/Peanuts/Parabens).
 - Example: { "name": "Amyl Cinnamal", "warning": "Cinnamon Derivative" }, { "name": "Water" }
 If the image is NOT food or a product, return:
