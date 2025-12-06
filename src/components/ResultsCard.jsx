@@ -111,7 +111,7 @@ export function ResultsCard({ results, onClose }) {
                             <a
                                 href={
                                     results.category === 'Cosmetic'
-                                        ? `https://www.google.com/search?q=${encodeURIComponent(results.productName + " ingredients site:incidecoder.com OR site:skincarisma.com")}`
+                                        ? `https://www.google.com/search?q=${encodeURIComponent(results.productName + " ingredients site:incidecoder.com OR site:skincarisma.com OR site:dermnetnz.org")}`
                                         : `https://www.google.com/search?q=${encodeURIComponent(results.productName + " ingredients site:openfoodfacts.org")}`
                                 }
                                 target="_blank"
