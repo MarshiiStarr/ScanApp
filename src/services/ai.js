@@ -90,12 +90,117 @@ Do not surround with markdown backticks. Just return raw JSON.
 
             } catch (error) {
                 console.warn(`Model ${modelName} failed:`, error);
-                lastError = error;
-                // Continue to next model
-            }
-        }
+                import { GoogleGenerativeAI } from "@google/generative-ai";
 
-        // If we get here, all models failed
-        console.error("All AI models failed.");
-        throw new Error(`AI Analysis Failed. Verified API Key? (Error: ${lastError.message})`);
-    }
+                const PROMPT = `
+Analyze this image. If it contains food or a product with ingredients, list the main ingredients.
+Format your response as a simple JSON object with a key "ingredients".
+Each ingredient should have a "name" and optional "warning" (if it's a common allergen or unhealthy additive).
+Example:
+{
+  "ingredients": [
+    { "name": "Water" },
+    { "name": "Sugar", "warning": "High Sugar" },
+    { "name": "Peanuts", "warning": "Allergen" }
+  ]
+}
+If the image is NOT food or a product, return:
+{ "ingredients": [], "error": "No food/product detected" }
+Do not surround with markdown backticks. Just return raw JSON.
+`;
+
+                export async function analyzeImage(videoElement, apiKey) {
+                    if (!apiKey) {
+                        throw new Error("API Key missing");
+                    }
+
+                    // 1. Capture image from video
+                    const canvas = document.createElement("canvas");
+                    canvas.width = videoElement.videoWidth;
+                    canvas.height = videoElement.videoHeight;
+                    import { GoogleGenerativeAI } from "@google/generative-ai";
+
+                    const PROMPT = `
+Analyze this image. If it contains food or a product with ingredients, list the main ingredients.
+Format your response as a simple JSON object with a key "ingredients".
+Each ingredient should have a "name" and optional "warning" (if it's a common allergen or unhealthy additive).
+Example:
+{
+  "ingredients": [
+    { "name": "Water" },
+    { "name": "Sugar", "warning": "High Sugar" },
+    { "name": "Peanuts", "warning": "Allergen" }
+  ]
+}
+If the image is NOT food or a product, return:
+{ "ingredients": [], "error": "No food/product detected" }
+Do not surround with markdown backticks. Just return raw JSON.
+`;
+
+                    export async function analyzeImage(videoElement, apiKey) {
+                        if (!apiKey) {
+                            throw new Error("API Key missing");
+                        }
+
+                        // 1. Capture image from video
+                        const canvas = document.createElement("canvas");
+                        canvas.width = videoElement.videoWidth;
+                        canvas.height = videoElement.videoHeight;
+                        const ctx = canvas.getContext("2d");
+                        ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+                        // 2. Convert to base64 (jpeg)
+                        const base64Image = canvas.toDataURL("image/jpeg").split(',')[1];
+
+                        // 3. Define models to try
+                        const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-pro"];
+                        const genAI = new GoogleGenerativeAI(apiKey);
+
+                        let lastError = null;
+
+                        for (const modelName of modelsToTry) {
+                            try {
+                                console.log(`Attempting analysis with model: ${modelName}`);
+                                const model = genAI.getGenerativeModel({ model: modelName });
+
+                                const result = await model.generateContent([
+                                    PROMPT,
+                                    {
+                                        inlineData: {
+                                            data: base64Image,
+                                            mimeType: "image/jpeg",
+                                        },
+                                    },
+                                ]);
+
+                                const responseText = result.response.text();
+                                console.log("Raw AI Response:", responseText);
+
+                                // Clean up markdown if present
+                                const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+                                return JSON.parse(cleanJson);
+
+                            } catch (error) {
+                                console.warn(`Model ${modelName} failed:`, error);
+                                lastError = error;
+                                // Continue to next model
+                            }
+                        }
+
+                        // If we get here, all models failed
+                        console.error("All AI models failed.");
+
+                        // Diagnostic: Check what models ARE available directly
+                        try {
+                            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+                            const data = await response.json();
+                            if (data && data.models) {
+                                const available = data.models.map(m => m.name.replace('models/', '')).join(', ');
+                                throw new Error(`Models 404. Your Key sees: ${available}`);
+                            }
+                        } catch (diagError) {
+                            console.error("Diagnostic failed", diagError);
+                        }
+
+                        throw new Error(`AI Analysis Failed. Verify API Key. (Last Error: ${lastError.message})`);
+                    }
