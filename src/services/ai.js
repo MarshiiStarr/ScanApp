@@ -16,6 +16,8 @@ Format your response as a simple JSON object with keys "productName", "category"
   2. EGG (Egg, Albumin, Globulin, Ovum, Lysozyme, Ovalbumin, etc.)
   3. CINNAMON & CINNAMATES (Cinnamal, Cinnamyl Alcohol, Benzyl Cinnamate, Octinoxate, Octocrylene, Cinoxate, Octyl Methoxycinnamate).
   4. SALICYLATES (Salicylic Acid, Benzyl Salicylate, Homosalate, Octyl Salicylate, Trolamine Salicylate, Phenyl Salicylate, Amyl Salicylate).
+- **ACCURACY RULE**: In "KnowledgeBase" mode, do NOT list specific chemical allergens (like Benzyl Salicylate) unless you are certain they are in this specific variant.
+- **Connection**: If you flag a specific allergen (like Benzyl Salicylate) that is often hidden inside "Fragrance", explicitly say so in the warning (e.g. "Warning: Likely present inside Fragrance/Parfum").
 - **DEEP DIVE**: If an ingredient is vague (e.g. "Fragrance", "Parfum", "Flavor", "Spices"), add a "description" field explaining what it likely hides.
   - Example: { "name": "Fragrance", "warning": "Potential Risk", "description": "Fragrance mixes often contain hidden allergens like Cinnamal or Limonene." }
 - Do NOT flag anything else (like Sugar/Peanuts/Parabens).
