@@ -27,29 +27,42 @@ export function ResultsCard({ results, onClose }) {
                         )}
                     </div>
                     <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '2px 0 5px 0' }}>{results.productName || "Ingredients Found"}</h1>
-                    {results.productName && (
-                        <a
-                            href={
-                                results.category === 'Cosmetic'
-                                    ? `https://www.google.com/search?q=${encodeURIComponent(results.productName + " ingredients site:incidecoder.com OR site:skincarisma.com")}`
-                                    : `https://www.google.com/search?q=${encodeURIComponent(results.productName + " ingredients site:openfoodfacts.org")}`
-                            }
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                                color: 'var(--primary-accent)',
-                                fontSize: '0.9rem',
-                                textDecoration: 'none',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '5px'
-                            }}
-                        >
-                            <span>
-                                {results.category === 'Cosmetic' ? "🧪 View on INCIDecoder" : "🍎 View on OpenFoodFacts"}
-                            </span>
-                        </a>
-                    )}
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            fontSize: '0.8rem',
+                            opacity: 0.8,
+                            background: 'rgba(255,255,255,0.1)',
+                            padding: '4px 8px',
+                            borderRadius: '4px'
+                        }}>
+                            <span>{results.analysisMethod === 'OCR' ? '📷 Scanned from Label' : '🧠 AI Database (Inferred)'}</span>
+                        </div>
+
+                        {results.productName && (
+                            <a
+                                href={
+                                    results.category === 'Cosmetic'
+                                        ? `https://www.google.com/search?q=${encodeURIComponent(results.productName + " ingredients site:incidecoder.com OR site:skincarisma.com")}`
+                                        : `https://www.google.com/search?q=${encodeURIComponent(results.productName + " ingredients site:openfoodfacts.org")}`
+                                }
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                    color: 'var(--primary-accent)',
+                                    fontSize: '0.8rem',
+                                    textDecoration: 'none',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '5px'
+                                }}
+                            >
+                                <span>🔎 Verify Online</span>
+                            </a>
+                        )}
+                    </div>
                 </div>
                 <button onClick={onClose} className="close-button">×</button>
             </div>
