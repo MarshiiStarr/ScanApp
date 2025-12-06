@@ -3,7 +3,14 @@ import { CameraView } from './components/CameraView';
 import { ScannerOverlay } from './components/ScannerOverlay';
 import { ResultsCard } from './components/ResultsCard';
 import { SettingsModal } from './components/SettingsModal';
-import { analyzeImage } from './services/ai';
+import { ErrorBoundary } from './components/ErrorBoundary';
+
+// ... (imports remain)
+
+// Inside App component return:
+<ErrorBoundary onReset={handleCloseResults}>
+  <ResultsCard results={results} onClose={handleCloseResults} />
+</ErrorBoundary>
 import './App.css';
 
 import { HistoryModal } from './components/HistoryModal';
@@ -184,7 +191,9 @@ function App() {
         </div>
       </div>
 
-      <ResultsCard results={results} onClose={handleCloseResults} />
+      <ErrorBoundary onReset={handleCloseResults}>
+        <ResultsCard results={results} onClose={handleCloseResults} />
+      </ErrorBoundary>
 
       <SettingsModal
         isOpen={isSettingsOpen}

@@ -157,9 +157,10 @@ export function ResultsCard({ results, onClose }) {
             </div>
             <ul className="ingredients-list" ref={listRef}>
                 {results.ingredients && results.ingredients.length > 0 ? (
-                    results.ingredients.map((item, index) => (
-                        <ExpandableIngredient key={index} item={item} />
-                    ))
+                    results.ingredients.map((item, index) => {
+                        if (!item || typeof item !== 'object') return null; // Defensive check
+                        return <ExpandableIngredient key={index} item={item} />;
+                    })
                 ) : (
                     <li className="ingredient-item" style={{ flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '30px', opacity: 0.6 }}>
                         <span style={{ fontSize: '2rem', marginBottom: '10px' }}>🕵️‍♀️</span>
