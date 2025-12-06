@@ -3,18 +3,18 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const PROMPT = `
 Identify the product in the image.
 
-**TASK**: Find the **EXACT** ingredient list for this product using **Google Search**.
+**GOAL**: Find the **exact ingredients** for this product sold in **New Zealand**.
 
-**RESTRICTED DOMAINS (WHITELIST)**:
-1. **Beauty**: sephora.nz
-2. **Food**: woolworths.co.nz, paknsave.co.nz, newworld.co.nz
+**SEARCH INSTRUCTIONS**:
+1. Search for the product name + "ingredients" + "New Zealand".
+2. You **MUST** find the information on one of these specific websites:
+   - **woolworths.co.nz** (Countdown)
+   - **paknsave.co.nz**
+   - **newworld.co.nz**
+   - **sephora.nz** (if cosmetic)
 
-**INSTRUCTIONS**:
-1. **SEARCH**: Perform a Google Search for: "{Product Name} ingredients site:{Allowed Domain}".
-   - *Example*: "Vimto ingredients site:woolworths.co.nz"
-2. **VERIFY**: Read the search snippets or page content.
-3. **EXTRACT**: Return the list found **specifically** on the allowed domain.
-4. **NO MATCH?**: If you cannot find a result on the allowed domain, returns "sources": []. **DO NOT GUESS.**
+3. **VERIFY**: Read the website content. The ingredients MUST match the NZ version (look for "Sugar" first in M&Ms, not Corn Syrup).
+4. **OUTPUT**: Return the data in this JSON format. If you cannot find it on an NZ site, return empty sources.
 
 **Output JSON**:
 {
@@ -24,7 +24,7 @@ Identify the product in the image.
   "sources": [
      {
        "name": "Domain Found On",
-       "url": "Source URL",
+       "url": "Specific Page URL",
        "ingredients": ["List"]
      }
   ],
@@ -58,9 +58,9 @@ export async function analyzeImage(imageSource, apiKey) {
 
     const genAI = new GoogleGenerativeAI(apiKey);
 
-    // Use Pro model with Search Grounding enabled
+    // UPGRADE: Use Gemini 1.5 Pro for better reasoning and search usage
     const model = genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
+        model: "gemini-1.5-pro",
         tools: [{
             googleSearchRetrieval: {
                 dynamicRetrievalConfig: {
@@ -72,7 +72,7 @@ export async function analyzeImage(imageSource, apiKey) {
     });
 
     try {
-        console.log("Analyzing with Live Google Search...");
+        console.log("Analyzing with Live Google Search (Gemini 1.5 Pro)...");
         const result = await model.generateContent([
             PROMPT,
             { inlineData: { data: base64Image, mimeType: "image/jpeg" } }
@@ -86,7 +86,7 @@ export async function analyzeImage(imageSource, apiKey) {
 
         // Sanitize
         if (!Array.isArray(rawData.sources)) rawData.sources = [];
-        if (!rawData.ingredients) rawData.ingredients = []; // Fallback
+        if (!rawData.ingredients) rawData.ingredients = [];
 
         return rawData;
 
