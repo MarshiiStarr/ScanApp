@@ -4,11 +4,13 @@ const PROMPT = `
 Analyze this image. If it contains **Food** OR **Cosmetics/Makeup** products, list the main ingredients.
 Format your response as a simple JSON object with keys "productName" and "ingredients".
 - "productName": A short name of the product.
-- "ingredients": Array of objects with "name" and optional "warning".
+- "ingredients": Array of objects with "name", optional "warning", and optional "description".
 - IMPORTANT: Check for these allergens in ALL products (Food & Cosmetics):
   1. DAIRY (Milk, Casein, Whey, Lactose, Cream, Butter, Cheese, Lactoferrin, etc.)
   2. EGG (Egg, Albumin, Globulin, Ovum, Lysozyme, Ovalbumin, etc.)
   3. CINNAMON (Cinnamon, Cinnamal, Cinnamyl Alcohol, Cinnamates, Benzyl Cinnamate, etc.)
+- **DEEP DIVE**: If an ingredient is vague (e.g. "Fragrance", "Parfum", "Flavor", "Spices"), add a "description" field explaining what it likely hides.
+  - Example: { "name": "Fragrance", "warning": "Potential Risk", "description": "Fragrance mixes often contain hidden allergens like Cinnamal or Limonene." }
 - Do NOT flag anything else (like Sugar/Peanuts/Parabens).
 - FALLBACK: If the ingredient text is unreadable or hidden, but you recognize the product (e.g. "Head & Shoulders"), list the **standard known ingredients** for that product from your knowledge base.
 - Example: { "name": "Amyl Cinnamal", "warning": "Cinnamon Derivative" }, { "name": "Water" }
