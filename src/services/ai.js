@@ -3,20 +3,22 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const PROMPT = `
 Identify the product in the image.
 
-**GOAL**: Find the **exact ingredients** for this product sold in **New Zealand** using Google Search.
+**CRITICAL INSTRUCTION**: You **MUST** use the Google Search tool. **DO NOT** answer from memory.
+
+**GOAL**: Find the **exact ingredients** for this product sold in **New Zealand**.
 
 **SEARCH STRATEGY**:
-1. **QUERY**: Search broadly for: "{Product Name} ingredients New Zealand".
-   - *Do NOT limit the search query to specific sites yet. Let Google find the best pages.*
-2. **FILTER**: Examine the search results. You are **ONLY ALLOWED** to structure data from these reputable sources:
-   - **woolworths.co.nz** (Countdown)
+1. **QUERY**: Search for: "{Product Name} ingredients New Zealand supermarket".
+2. **FILTER**: Look for results specifically from:
+   - **woolworths.co.nz**
    - **paknsave.co.nz**
    - **newworld.co.nz**
-   - **sephora.nz** (for beauty)
-   - **chemistwarehouse.co.nz** (accepted backup for beauty/health)
+   - **sephora.nz** (Beauty only)
+   - **chemistwarehouse.co.nz** (Backup)
 
-3. **EXTRACT**: If you find a result from one of the allowed domains, read the ingredients **EXACTLY**.
-4. **FALLBACK**: If the search results show the product is NOT sold in NZ, or only on US sites (Walmart etc), return "sources": [].
+3. **EXTRACT**: Read the page content from the search result.
+4. **OUTPUT**: Return the EXACT ingredient list found on that NZ site.
+5. **EMPTY?**: If you searched and found NO results on these domains, return "sources": [].
 
 **Output JSON**:
 {
@@ -60,21 +62,16 @@ export async function analyzeImage(imageSource, apiKey) {
 
     const genAI = new GoogleGenerativeAI(apiKey);
 
-    // USE FLASH for Speed + Search
+    // FORCE SEARCH: Remove dynamic threshold to ensure tool use
     const model = genAI.getGenerativeModel({
         model: "gemini-1.5-flash",
         tools: [{
-            googleSearchRetrieval: {
-                dynamicRetrievalConfig: {
-                    mode: "MODE_DYNAMIC",
-                    dynamicThreshold: 0.6, // Lower threshold to encourage searching
-                },
-            },
+            googleSearchRetrieval: {} // Default settings = standard grounding
         }]
     });
 
     try {
-        console.log("Analyzing with Live Google Search (Gemini 1.5 Flash)...");
+        console.log("Analyzing with FORCED Live Google Search...");
         const result = await model.generateContent([
             PROMPT,
             { inlineData: { data: base64Image, mimeType: "image/jpeg" } }
