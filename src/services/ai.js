@@ -8,7 +8,8 @@ Format your response as a simple JSON object with keys "productName" and "ingred
 - IMPORTANT: Check for these allergens in ALL products (Food & Cosmetics):
   1. DAIRY (Milk, Casein, Whey, Lactose, Cream, Butter, Cheese, Lactoferrin, etc.)
   2. EGG (Egg, Albumin, Globulin, Ovum, Lysozyme, Ovalbumin, etc.)
-  3. CINNAMON (Cinnamon, Cinnamal, Cinnamyl Alcohol, Cinnamates, Benzyl Cinnamate, etc.)
+  3. CINNAMON & CINNAMATES (Cinnamal, Cinnamyl Alcohol, Benzyl Cinnamate, Octinoxate, Octocrylene, Cinoxate, Octyl Methoxycinnamate).
+  4. SALICYLATES (Salicylic Acid, Benzyl Salicylate, Homosalate, Octyl Salicylate, Trolamine Salicylate, Phenyl Salicylate, Amyl Salicylate).
 - **DEEP DIVE**: If an ingredient is vague (e.g. "Fragrance", "Parfum", "Flavor", "Spices"), add a "description" field explaining what it likely hides.
   - Example: { "name": "Fragrance", "warning": "Potential Risk", "description": "Fragrance mixes often contain hidden allergens like Cinnamal or Limonene." }
 - Do NOT flag anything else (like Sugar/Peanuts/Parabens).
