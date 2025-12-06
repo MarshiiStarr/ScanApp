@@ -102,37 +102,42 @@
   letter-spacing: 0.5px;
 }
 
+/* Modern Top Bar */
 .top-bar {
   position: absolute;
-  top: 40px;
-  /* Move down from top edge */
-  right: 30px;
-  /* Move in from right edge */
+  top: 60px;
+  /* Much lower to clear status bars/notches */
+  right: 35px;
+  /* Further from edge */
   display: flex;
   gap: 20px;
-  /* More gap */
-  z-index: 20;
+  z-index: 50;
+  /* Ensure on top of everything */
 }
 
 .icon-btn {
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  font-size: 1.2rem;
+  background: rgba(20, 20, 20, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  width: 50px;
+  /* Larger touch target */
+  height: 50px;
+  border-radius: 16px;
+  /* Squircle shape instead of circle for modern feel */
+  font-size: 1.5rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   color: white;
   cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.icon-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.1);
+.icon-btn:active {
+  transform: scale(0.92);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .settings-btn-top:hover {
