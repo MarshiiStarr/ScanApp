@@ -1,38 +1,31 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const PROMPT = `
-Analyze this image. If it contains **Food** OR **Cosmetics/Makeup** products, list the main ingredients.
+Analyze this image. If it contains **Food** OR **Cosmetics/Makeup** products, identify the product.
 
-**MODE: CONSENSUS SEARCH**
+**MODE: MULTI-SOURCE VERIFICATION**
 1. Identify the product name and variant.
-2. Simulate a search for this products ingredient list across the **Top 15 Popular Retail & Informational Websites** (e.g. Amazon, Sephora, UIta, Target, Walmart, Boots, Walgreens, EWG, INCIDecoder, Paulas Choice, official brand site, etc.).
-3. **Compare** the lists found on these different sites.
-4. **Sort** the ingredients by "Consensus":
-   - **High Consensus**: Ingredients appearing on almost ALL checked sites.
-   - **Medium Consensus**: Ingredients appearing on MANY sites.
-   - **Low Consensus**: Ingredients appearing on only FEW sites.
+2. Recall the ingredient lists for this product as listed on the **Top Popular Websites** (e.g. Amazon, Sephora, Ulta, Target, EWG, Paulas Choice, Official Brand Site).
+3. **Group** the data by Source.
 
 Format your response as a JSON object:
 {
   "productName": "String",
   "category": "Food" or "Cosmetic",
-  "analysisMethod": "ConsensusSearch",
-  "sourcesChecked": ["List", "of", "sites", "you", "considered"],
-  "ingredients": [
+  "analysisMethod": "MultiSource",
+  "sources": [
     {
-       "name": "Ingredient Name",
-       "consensus": "High" | "Medium" | "Low",
-       "commonality": "Found on ~90% of sites" (Estimations),
-       "warning": "Allergen Warning if applicable"
+      "name": "Source Name" (e.g. "Sephora", "EWG", "Official Site"),
+      "url": "Likely URL if known" (optional),
+      "ingredients": ["Water", "Glycerin", "Fragrance"] (List of strings)
     }
   ],
   "isVegan": Boolean
 }
 
-- **Strict Adherence**: **DO NOT** list ingredients just because they are "usually" in this product. If you cannot confirm an ingredient is listed on at least one of the 15 sites, **OMIT IT**. It is better to return a shorter, accurate list than a long, guessed one.
-- **Isolate Allergens**: Check for DAIRY, EGG, CINNAMATES, SALICYLATES.
-- **Deep Dive**: If "Fragrance" is listed, add a "description" field noting it likely contains hidden allergens if permissible by the consensus data.
-- **Strictness**: If the product is NOT found on major sites, return an empty ingredient list and state "Product not widely available for consensus" in an error field.
+- **No Warnings**: Do NOT add allergen warnings or "common fragrance allergen" notes. Just list the raw ingredients.
+- **Strictness**: If the product is not found on a specific site, do not include that site in the list.
+- **Variety**: Try to include at least 3-5 different sources if available to show the user any discrepancies.
 
 Do not surround with markdown backticks. Just return raw JSON.
 `;
