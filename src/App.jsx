@@ -56,6 +56,10 @@ function App() {
 
   // Helper to capture frame
   const captureVideoFrame = (video) => {
+    if (!video || video.videoWidth === 0 || video.videoHeight === 0) {
+      console.warn("Video frame not ready for capture");
+      return null;
+    }
     const canvas = document.createElement("canvas");
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -88,6 +92,9 @@ function App() {
       } else if (videoRef.current) {
         // If camera, capture frame immediately
         const frameData = captureVideoFrame(videoRef.current);
+        if (!frameData) {
+          throw new Error("Camera not ready. Please try again.");
+        }
         setFrozenFrame(frameData);
         source = frameData; // Pass base64 to AI
       } else {
