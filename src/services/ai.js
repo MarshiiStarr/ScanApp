@@ -6,7 +6,9 @@ Format your response as a simple JSON object with keys "productName", "category"
 - "productName": A short name of the product.
 - "category": String. Must be either "Food" or "Cosmetic".
 - "analysisMethod": String. Either "OCR" (if you read the ingredients directly from the image text) OR "KnowledgeBase" (if you recognized the product and inferred ingredients from your training data).
-- "knowledgeSources": Array of strings. IF analysisMethod is "KnowledgeBase", list 2-3 specific authoritative sources (websites/databases) that inform this list (e.g. "OpenFoodFacts", "DermNetNZ", "Official Brand Site").
+- "knowledgeSources": Array of strings. IF analysisMethod is "KnowledgeBase", list sources ONLY if you are certain.
+  - **CRITICAL**: Do NOT invent sources. If a specific product variant (e.g. "Cheirosa 48") is likely not in public databases, state "General Brand Formulation" or "Similar Products".
+  - DO NOT list "INCIDecoder" or "Sephora" unless you are sure the product is listed there.
 - "isVegan": Boolean (true/false). True ONLY if the product appears free of all animal-derived ingredients (meat, dairy, eggs, honey, beeswax, lanolin, carmine, etc).
 - "ingredients": Array of objects with "name", optional "warning", and optional "description".
 - IMPORTANT: Check for these allergens in ALL products (Food & Cosmetics):

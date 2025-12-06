@@ -70,6 +70,21 @@ export function ResultsCard({ results, onClose }) {
                             {results.knowledgeSources.join(', ')}
                         </div>
                     )}
+
+                    {results.analysisMethod === 'KnowledgeBase' && (
+                        <div style={{
+                            marginTop: '10px',
+                            padding: '8px',
+                            background: 'rgba(255, 200, 0, 0.15)',
+                            border: '1px solid rgba(255, 200, 0, 0.3)',
+                            borderRadius: '6px',
+                            fontSize: '0.8rem',
+                            color: '#ffcc00',
+                            textAlign: 'left'
+                        }}>
+                            ⚠️ <strong>Estimation:</strong> Exact ingredients for this variant may differ. Always verify with the physical bottle.
+                        </div>
+                    )}
                 </div>
                 <button onClick={onClose} className="close-button">×</button>
             </div>
