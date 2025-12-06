@@ -1,4 +1,4 @@
-import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const PROMPT = `
 Analyze this image. If it contains food or a product with ingredients, list the main ingredients.
@@ -31,44 +31,78 @@ export async function analyzeImage(videoElement, apiKey) {
 
     // 2. Convert to base64 (jpeg)
     const base64Image = canvas.toDataURL("image/jpeg").split(',')[1];
-    const dataUrl = `data:image/jpeg;base64,${base64Image}`;
 
-    // 3. Call OpenAI API
-    const openai = new OpenAI({
-        apiKey: apiKey,
-        dangerouslyAllowBrowser: true // Required for client-side usage
-    });
+    // 3. Define models to try (Fallback strategy)
+    // We try specific versions to avoid ambiguity
+    const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-pro"];
+    const genAI = new GoogleGenerativeAI(apiKey);
+
+    let lastError = null;
+
+    for (const modelName of modelsToTry) {
+        try {
+            console.log(`Attempting analysis with model: ${modelName}`);
+            const model = genAI.getGenerativeModel({ model: modelName });
+
+            const result = await model.generateContent([
+                PROMPT,
+                {
+                    inlineData: {
+                        data: base64Image,
+                        mimeType: "image/jpeg",
+                    },
+                },
+            ]);
+
+            const responseText = result.response.text();
+            console.log("Raw AI Response:", responseText);
+
+            // Clean up markdown if present
+            const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+            return JSON.parse(cleanJson);
+
+        } catch (error) {
+            console.warn(`Model ${modelName} failed:`, error);
+            lastError = error;
+            // Continue to next model
+        }
+    }
+
+    // If we get here, all models failed
+    console.error("All AI models failed.");
+    throw new Error(`AI Analysis Failed. Verify API Key settings. (Error: ${lastError?.message})`);
+}
+
+// Diagnostic Tool
+export async function testConnection(apiKey) {
+    if (!apiKey) return { success: false, message: "No API Key provided" };
 
     try {
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
-            messages: [
-                {
-                    role: "user",
-                    content: [
-                        { type: "text", text: PROMPT },
-                        {
-                            type: "image_url",
-                            image_url: {
-                                url: dataUrl,
-                                detail: "low" // 'low' is faster and cheaper, usually sufficient for text
-                            },
-                        },
-                    ],
-                },
-            ],
-            max_tokens: 500,
-        });
+        // Try REST API directly to list models (avoids SDK weirdness)
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
 
-        const responseText = response.choices[0].message.content;
-        console.log("Raw AI Response:", responseText);
+        if (!response.ok) {
+            const err = await response.json();
+            return {
+                success: false,
+                message: `Google API Error (${response.status}): ${err.error?.message || response.statusText}`
+            };
+        }
 
-        // Clean up markdown if present
-        const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-        return JSON.parse(cleanJson);
+        const data = await response.json();
+        if (data && data.models) {
+            // Filter for generateContent supported models
+            const available = data.models
+                .filter(m => m.supportedGenerationMethods.includes('generateContent'))
+                .map(m => m.name.replace('models/', ''))
+                .join(', ');
+
+            return { success: true, message: `Success! Available models: ${available}` };
+        }
+
+        return { success: false, message: "Key valid, but NO models returned from ListModels." };
 
     } catch (error) {
-        console.error("AI Analysis Failed:", error);
-        throw new Error(error.message || "Failed to analyze image");
+        return { success: false, message: `Network Error: ${error.message}` };
     }
 }

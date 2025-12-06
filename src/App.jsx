@@ -14,7 +14,7 @@ function App() {
 
   // Check for API Key on mount
   useEffect(() => {
-    const key = localStorage.getItem('openai_api_key');
+    const key = localStorage.getItem('gemini_api_key');
     if (!key) {
       // open settings automatically if no key found (optional, maybe just show a hint)
       // setIsSettingsOpen(true); 
@@ -24,7 +24,7 @@ function App() {
   const handleScan = async () => {
     if (scanning) return;
 
-    const apiKey = localStorage.getItem('openai_api_key');
+    const apiKey = localStorage.getItem('gemini_api_key');
     if (!apiKey) {
       setIsSettingsOpen(true);
       return;

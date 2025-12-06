@@ -93,11 +93,60 @@
     border-color: var(--primary-accent);
 }
 
+.test-section {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.btn-test {
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.btn-test:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-test:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.test-result {
+    font-size: 0.8rem;
+    padding: 8px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.2);
+    word-break: break-word;
+    max-height: 100px;
+    overflow-y: auto;
+}
+
+.test-result.success {
+    border: 1px solid #4ade80;
+    color: #4ade80;
+}
+
+.test-result.error {
+    border: 1px solid #ef4444;
+    color: #ef4444;
+}
+
 .settings-actions {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
     margin-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 15px;
 }
 
 .settings-actions button {
