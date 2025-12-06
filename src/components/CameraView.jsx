@@ -11,24 +11,40 @@ export function CameraView({ onRef }) {
         let stream = null;
 
         async function setupCamera() {
-            // Check if MediaDevices API is available (often undefined in insecure contexts like HTTP)
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                setError("Camera access requires a secure connection (HTTPS). This app may not work on mobile via HTTP.");
+                setError("Camera API not available. Ensure you are using HTTPS.");
                 return;
             }
 
             try {
+                // Try environment camera first
                 stream = await navigator.mediaDevices.getUserMedia({
                     video: { facingMode: 'environment' }
                 });
-                if (videoRef.current) {
-                    videoRef.current.srcObject = stream;
-                }
-                setError(null);
             } catch (err) {
-                console.error("Error accessing camera:", err);
-                setError(`Camera Error: ${err.message || 'Permission denied'}`);
+                console.warn("Environment camera failed, trying fallback...", err);
+                try {
+                    // Fallback to any video source
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: true
+                    });
+                } catch (fallbackErr) {
+                    console.error("All camera attempts failed:", fallbackErr);
+                    setError(`Camera Error: ${fallbackErr.message}`);
+                    return;
+                }
             }
+
+            if (videoRef.current && stream) {
+                videoRef.current.srcObject = stream;
+                // Explicitly play to avoid mobile auto-play blocks
+                try {
+                    await videoRef.current.play();
+                } catch (playErr) {
+                    console.error("Video play failed:", playErr);
+                }
+            }
+            setError(null);
         }
 
         setupCamera();
