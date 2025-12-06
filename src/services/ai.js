@@ -29,6 +29,7 @@ Format your response as a JSON object:
   "isVegan": Boolean
 }
 
+- **Strict Adherence**: **DO NOT** list ingredients just because they are "usually" in this product. If you cannot confirm an ingredient is listed on at least one of the 15 sites, **OMIT IT**. It is better to return a shorter, accurate list than a long, guessed one.
 - **Isolate Allergens**: Check for DAIRY, EGG, CINNAMATES, SALICYLATES.
 - **Deep Dive**: If "Fragrance" is listed, add a "description" field noting it likely contains hidden allergens if permissible by the consensus data.
 - **Strictness**: If the product is NOT found on major sites, return an empty ingredient list and state "Product not widely available for consensus" in an error field.
